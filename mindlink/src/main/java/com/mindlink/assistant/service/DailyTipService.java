@@ -7,10 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Service Layer for Daily Tips Module
- * Uses DAO pattern for data access - delegates to DAO implementations
- */
 @Service
 public class DailyTipService {
 
@@ -18,21 +14,19 @@ public class DailyTipService {
     private DailyTipDAO dailyTipDAO;
 
     /**
-     * Get a random daily tip
+     * Get a random tip
      */
     public DailyTip getRandomTip() {
         return dailyTipDAO.findRandom();
     }
 
-    /**
-     * Get 3 random daily tips
-     */
+
     public List<DailyTip> getThreeRandomTips() {
         return dailyTipDAO.findThreeRandom();
     }
 
     /**
-     * Get all daily tips
+     * Get all tips
      */
     public List<DailyTip> getAllTips() {
         return dailyTipDAO.findAll();
@@ -46,21 +40,21 @@ public class DailyTipService {
     }
 
     /**
-     * Add a new daily tip
+     * Add a new tip
      */
     public void addTip(String title, String content) {
         dailyTipDAO.create(title, content);
     }
 
     /**
-     * Update a daily tip
+     * Update a tip
      */
     public void updateTip(int id, String title, String content) {
         dailyTipDAO.update(id, title, content);
     }
 
     /**
-     * Delete a daily tip
+     * Delete a tip
      */
     public void deleteTip(int id) {
         dailyTipDAO.delete(id);

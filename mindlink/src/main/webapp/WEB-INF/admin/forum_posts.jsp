@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <title>Forum Posts Management - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg-color: #FFF3E0;
@@ -91,22 +92,22 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
             background: white;
-            border: 1px solid #e0e0e0;
-            text-decoration: none;
-            font-size: 20px;
             color: var(--text-dark);
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 18px;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            transition: 0.2s;
         }
 
         .back-btn:hover {
-            background: #f9f9f9;
-            border-color: var(--btn-blue);
-            transform: translateX(-2px);
+            background: #F77F00;
+            color: white;
+            transform: translateX(-5px);
         }
 
         h1 {
@@ -173,6 +174,22 @@
 
         .clear-btn:hover {
             background-color: #d0d0d0;
+        }
+
+        .search-button {
+            padding: 8px 20px;
+            background-color: var(--btn-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-button:hover {
+            background-color: #004d61;
         }
 
         .post-id {
@@ -412,20 +429,21 @@
     </div>
 
     <div class="container">
+        <a href="${pageContext.request.contextPath}/admin/forum/manage" class="back-btn" title="Back to Forums">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
         <div class="page-header">
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <a href="${pageContext.request.contextPath}/admin/forum/manage" class="back-btn" title="Back to Forums">←</a>
-                <h1>
-                    <c:choose>
-                        <c:when test="${not empty forum}"><c:out value="${forum.title}" /> - Posts</c:when>
-                        <c:otherwise>Forum Posts Management</c:otherwise>
-                    </c:choose>
-                </h1>
-            </div>
+            <h1>
+                <c:choose>
+                    <c:when test="${not empty forum}"><c:out value="${forum.title}" /> - Posts</c:when>
+                    <c:otherwise>Forum Posts Management</c:otherwise>
+                </c:choose>
+            </h1>
         </div>
 
         <div class="filter-section">
-            <form method="get" action="${pageContext.request.contextPath}/admin/forum/posts" style="display: inline-block;">
+            <form method="get" action="${pageContext.request.contextPath}/admin/forum/posts" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                 <label for="forumId">Filter by Forum:</label>
                 <select name="forumId" id="forumId" onchange="this.form.submit()">
                     <option value="">All Forums</option>
@@ -433,10 +451,17 @@
                         <option value="${f.id}" ${param.forumId == f.id ? 'selected' : ''}><c:out value="${f.title}" /></option>
                     </c:forEach>
                 </select>
+                <input type="text" name="search" placeholder="Search by Post ID..." value="${searchQuery != null ? searchQuery : ''}" class="search-input">
+                <button type="submit" class="search-button">Search</button>
+                <c:if test="${searchQuery != null && !searchQuery.isEmpty()}">
+                    <a href="${pageContext.request.contextPath}/admin/forum/posts${param.forumId != null ? '?forumId=' : ''}${param.forumId != null ? param.forumId : ''}" class="clear-btn">Clear</a>
+                </c:if>
             </form>
-            <a href="${pageContext.request.contextPath}/admin/forum/posts" class="btn btn-primary">View All Posts</a>
-            <a href="${pageContext.request.contextPath}/admin/forum/reports" class="btn btn-danger">⚠️ View Reported Posts</a>
-            <a href="${pageContext.request.contextPath}/admin/forum/comments/reports" class="btn btn-danger">⚠️ View Reported Comments</a>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <a href="${pageContext.request.contextPath}/admin/forum/posts" class="btn btn-primary">View All Posts</a>
+                <a href="${pageContext.request.contextPath}/admin/forum/reports" class="btn btn-danger">⚠️ View Reported Posts</a>
+                <a href="${pageContext.request.contextPath}/admin/forum/comments/reports" class="btn btn-danger">⚠️ View Reported Comments</a>
+            </div>
         </div>
 
         <div class="stats">

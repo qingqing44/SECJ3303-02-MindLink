@@ -266,7 +266,7 @@
                         <li>Analyze data</li>
                     </ul>
                 </div>
-                <a href="${pageContext.request.contextPath}/admin/assessment" class="btn btn-teal">Update</a>
+                <a href="${pageContext.request.contextPath}/admin/assessment/select-module" class="btn btn-teal">Update</a>
             </div>
 
             <div class="admin-card">

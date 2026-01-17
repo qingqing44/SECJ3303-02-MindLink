@@ -384,7 +384,7 @@
 
     <!-- Container -->
     <div class="container">
-        <a href="${pageContext.request.contextPath}/forum/detail" class="back-btn">← Back</a>
+        <a href="${pageContext.request.contextPath}/forum/detail" class="back-btn">←</a>
 
         <div class="form-card">
             <h1 class="form-title">Create New Discussion</h1>
@@ -408,10 +408,6 @@
                             <div class="checkbox-item">
                                 <input type="checkbox" id="anonymous" name="anonymous" value="true">
                                 <label for="anonymous">Post anonymously</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="direct">
-                                <label for="direct">Allow direct messages about this post</label>
                             </div>
                         </div>
                     </div>

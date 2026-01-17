@@ -27,11 +27,9 @@ public class LearningController {
     private ModuleService moduleService;
 
     private String getStudentId(HttpSession session) {
-        // In a real app, retrieve from session. For now, hardcode to S001.
         return "S001";
     }
 
-    // This listens for the "/learning" URL from your Home Page
     @GetMapping("/learning")
     public String showLearningHub() {
         return "learning/hub";
@@ -50,7 +48,7 @@ public class LearningController {
         }
 
         model.addAttribute("modules", modules);
-        return "learning/modules"; // Student view in learning folder
+        return "learning/modules"; 
     }
 
     // Student view: View specific module
@@ -66,7 +64,7 @@ public class LearningController {
                 int percent = moduleService.getModuleProgressPercentage(studentId, module.getModuleId());
                 module.setProgressPercentage(percent);
 
-                // Get completed questions for UI buttons
+                // Get completed questions
                 List<UserProgress> progressList = moduleService.getStudentProgressForModule(studentId,
                         module.getModuleId());
                 Set<Integer> completedQuestionIds = progressList.stream()
@@ -79,15 +77,11 @@ public class LearningController {
                 return "learning/module-view";
             }
         }
-        // Fallback: get first module if no ID provided
-        var modules = moduleService.getAllModules();
-        if (!modules.isEmpty()) {
-            return "redirect:/learning/modules/view?id=" + modules.get(0).getModuleId();
-        }
+        
         return "redirect:/learning/modules";
     }
 
-    // AJAX Endpoint to save progress
+
     @PostMapping("/learning/modules/progress/save")
     @ResponseBody
     public Map<String, Object> saveProgress(@RequestParam("moduleId") int moduleId,

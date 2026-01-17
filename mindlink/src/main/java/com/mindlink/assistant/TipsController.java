@@ -18,7 +18,6 @@ public class TipsController {
     @Autowired
     private DailyTipService dailyTipService;
 
-    // URL: /ai/tips
     // JSP: WEB-INF/assistant/tips.jsp
     @GetMapping("/tips")
     public String showTips(Model model) {

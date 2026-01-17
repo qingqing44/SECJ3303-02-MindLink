@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <title>Manage Daily Tips</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg-color: #FFF3E0;
@@ -112,6 +113,28 @@
 
         .btn-primary:hover {
             background-color: #004d61;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: white;
+            color: var(--text-dark);
+            font-size: 18px;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            transition: 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #F77F00;
+            color: white;
+            transform: translateX(-5px);
         }
 
         .table-container {
@@ -333,6 +356,10 @@
     </div>
 
     <div class="container">
+        <a href="${pageContext.request.contextPath}/admin/home" class="btn-back" title="Back">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
         <div class="page-header">
             <h1>Daily Tips Management</h1>
             <a href="${pageContext.request.contextPath}/admin/tips/add" class="btn btn-primary">+ Add New Tip</a>

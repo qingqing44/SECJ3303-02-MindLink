@@ -10,64 +10,100 @@
     
     <style>
         :root {
+            --primary: #003049;
+            --accent-pink: #F497AA;
+            --accent-orange: #F77F00;
             --bg-color: #FFF3E0;
-            --text-dark: #003049;
-            --card-bg: #FFFFFF;
-            --btn-teal: #48C9B0;
-            --accent: #F497AA;
-            --gray: #666;
+            --glass-white: rgba(255, 255, 255, 0.9);
+            --text-grey: #555;
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
-            margin: 0; padding: 40px 20px; /* Increased top padding since header is gone */
-            color: var(--text-dark);
+            /* 🟢 Pink & Orange Gradient Background */
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(244, 151, 170, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(247, 127, 0, 0.1) 0%, transparent 50%);
+            margin: 0; 
+            padding: 40px 20px;
+            color: var(--primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        /* CONTAINER (Controls the width) */
-        .container { max-width: 1000px; margin: 0 auto; }
+        /* 🟢 ANIMATED BLOBS */
+        .blob {
+            position: absolute; filter: blur(60px); z-index: -1; opacity: 0.7;
+            animation: float 10s ease-in-out infinite;
+        }
+        .blob-1 { top: -50px; left: -50px; width: 400px; height: 400px; background: rgba(244, 151, 170, 0.2); border-radius: 40% 60% 70% 30%; }
+        .blob-2 { bottom: -50px; right: -50px; width: 600px; height: 600px; background: rgba(247, 127, 0, 0.15); border-radius: 60% 40% 30% 70%; animation-direction: reverse; }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(20px, 20px) rotate(5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
 
-        /* BACK BUTTON */
+        /* CONTAINER */
+        .container { max-width: 1000px; margin: 0 auto; position: relative; z-index: 1; }
+
+        /* 🟢 BACK BUTTON (Icon Style) */
         .btn-back { 
-            display: inline-flex; align-items: center; gap: 8px; 
-            text-decoration: none; color: #666; font-weight: 600; 
-            margin-bottom: 20px; transition: 0.2s; 
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 45px; height: 45px; border-radius: 50%;
+            background: white; color: var(--primary);
+            font-size: 18px; text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: 0.2s; margin-bottom: 20px;
         }
-        .btn-back:hover { color: var(--text-dark); transform: translateX(-5px); }
+        .btn-back:hover { background: var(--accent-pink); color: white; transform: translateX(-5px); }
 
-        /* CENTERED TITLE & SUBTITLE */
-        h1 { font-size: 32px; font-weight: 800; margin-bottom: 10px; text-align: center; }
-        .subtitle { color: var(--gray); margin-bottom: 40px; font-size: 16px; text-align: center; }
+        /* HEADER */
+        h1 { font-size: 32px; font-weight: 800; margin-bottom: 10px; text-align: center; color: var(--primary); }
+        .subtitle { color: var(--text-grey); margin-bottom: 40px; font-size: 16px; text-align: center; }
 
         /* HISTORY LIST */
         .history-list { display: flex; flex-direction: column; gap: 20px; }
 
+        /* 🟢 GLASS CARD */
         .history-card {
-            background: var(--card-bg);
+            background: var(--glass-white);
+            backdrop-filter: blur(10px);
             border-radius: 16px;
             padding: 25px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             display: grid;
             grid-template-columns: 1fr auto;
             align-items: center;
             transition: transform 0.2s;
-            border-left: 5px solid var(--btn-teal);
+            border: 1px solid rgba(255,255,255,0.6);
+            /* Pink accent border on the left */
+            border-left: 6px solid var(--accent-pink);
         }
-        .history-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
+        .history-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
 
         .card-content { display: flex; flex-direction: column; gap: 8px; }
 
-        .counselor-name { font-size: 18px; font-weight: 700; color: #111; display: flex; align-items: center; gap: 10px; }
-        .badge { background: #E0F2F1; color: #00695C; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .counselor-name { font-size: 18px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        
+        /* Badge style */
+        .badge { 
+            background: #FFF0F3; /* Light Pink */
+            color: #D81B60;      /* Dark Pink */
+            padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; 
+        }
 
         .details-row { font-size: 14px; color: #555; display: flex; gap: 20px; align-items: center; margin-top: 5px; }
-        .details-row i { color: var(--btn-teal); width: 20px; text-align: center; }
+        .details-row i { color: var(--accent-pink); width: 20px; text-align: center; }
 
         .booking-id { font-size: 12px; color: #999; margin-top: 5px; font-family: monospace; }
 
+        /* BUTTON */
         .btn-view {
-            background-color: var(--btn-teal);
+            background-color: var(--primary);
             color: white;
             text-decoration: none;
             padding: 12px 25px;
@@ -75,23 +111,37 @@
             font-weight: 600;
             font-size: 14px;
             transition: 0.2s;
-            box-shadow: 0 4px 10px rgba(72, 201, 176, 0.3);
+            box-shadow: 0 4px 10px rgba(0, 48, 73, 0.2);
         }
-        .btn-view:hover { background-color: #36b299; transform: translateY(-2px); }
+        .btn-view:hover { background-color: var(--accent-orange); transform: translateY(-2px); }
         
         /* Empty State */
-        .empty-state { text-align: center; padding: 50px; background: white; border-radius: 12px; color: #888; }
+        .empty-state { 
+            text-align: center; padding: 50px; 
+            background: rgba(255,255,255,0.6); 
+            border-radius: 16px; color: #888; 
+            border: 2px dashed #ddd;
+        }
+
+        @media (max-width: 600px) {
+            .history-card { grid-template-columns: 1fr; gap: 20px; }
+            .details-row { flex-wrap: wrap; gap: 10px; }
+        }
     </style>
 </head>
 <body>
 
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
     <div class="container">
-        <a href="${pageContext.request.contextPath}/counseling/home" class="btn-back">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        
+        <a href="${pageContext.request.contextPath}/counseling/home" class="btn-back" title="Back to Dashboard">
+            <i class="fas fa-arrow-left"></i>
         </a>
 
         <h1>Appointment History</h1>
-        <p class="subtitle">View details of your past sessions.</p>
+        <p class="subtitle">View details of your past counseling sessions.</p>
 
         <div class="history-list">
             
@@ -132,10 +182,10 @@
 
             <c:if test="${empty appointments}">
                 <div class="empty-state">
-                    <i class="fas fa-history" style="font-size: 40px; margin-bottom: 15px; color: #ddd;"></i>
+                    <i class="fas fa-history" style="font-size: 40px; margin-bottom: 15px; color: var(--accent-pink);"></i>
                     <p>No appointment history found.</p>
                     <a href="${pageContext.request.contextPath}/counseling/booking" 
-                       style="color: var(--btn-teal); font-weight: 600; text-decoration: none;">
+                       style="color: var(--accent-orange); font-weight: 600; text-decoration: none;">
                        Book a Session
                     </a>
                 </div>

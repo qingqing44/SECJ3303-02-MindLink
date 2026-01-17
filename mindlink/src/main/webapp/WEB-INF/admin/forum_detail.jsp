@@ -140,7 +140,7 @@
 
     <div class="header">
         <div class="logo">MindLink Admin - Forum Detail</div>
-        <a href="${pageContext.request.contextPath}/admin/forum/manage" class="btn btn-secondary">← Back to Forums</a>
+        <a href="${pageContext.request.contextPath}/admin/forum/manage" class="btn btn-secondary">←</a>
     </div>
 
     <c:if test="${not empty forum}">

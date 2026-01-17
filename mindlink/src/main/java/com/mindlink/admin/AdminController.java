@@ -21,7 +21,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
+
+import java.util.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,13 +165,78 @@ public class AdminController {
         return "redirect:/admin/feedback";
     }
 
-    // --- ANALYTICS & FORUM SECTIONS ---
-
+    // ANALYTICS PAGE
     @GetMapping("/analytics")
     public String showAnalyticsPage(Model model) {
-        DashboardStats stats = new DashboardStats(1250, 68.5, 8234, 342);
+        
+        // 1. BASIC COUNTS
+        int totalUsers = getCount("SELECT COUNT(*) FROM student"); 
+        int totalAppointments = getCount("SELECT COUNT(*) FROM appointment");
+        int pendingFeedback = getCount("SELECT COUNT(*) FROM feedback WHERE admin_reply IS NULL");
+        int totalPosts = getCount("SELECT COUNT(*) FROM forum_post");
+
+        // 2. FETCH RATING COUNTS (1 Star to 5 Stars)
+        // Initialize list with 5 zeros: [0, 0, 0, 0, 0]
+        List<Integer> ratingCounts = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0));
+        
+        try {
+            // Group by rating and count
+            String ratingSql = "SELECT rating, COUNT(*) as count FROM feedback GROUP BY rating";
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(ratingSql);
+            
+            for (Map<String, Object> row : rows) {
+                int rating = ((Number) row.get("rating")).intValue();
+                int count = ((Number) row.get("count")).intValue();
+                
+                if (rating >= 1 && rating <= 5) {
+                    ratingCounts.set(rating - 1, count); // Store at correct index (Rating 1 -> Index 0)
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 3. FETCH ACTIVITY (Last 7 Days)
+        List<String> last7DaysLabels = new ArrayList<>();
+        List<Integer> dailyAppointments = new ArrayList<>();
+        
+        // Date Formatters
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Matches DB format
+        SimpleDateFormat labelFormat = new SimpleDateFormat("EEE"); // "Mon", "Tue" for Chart
+        
+        // Loop backwards for 7 days
+        for (int i = 6; i >= 0; i--) {
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, -i);
+            
+            String dbDate = sdf.format(cal.getTime());
+            String label = labelFormat.format(cal.getTime());
+            
+            last7DaysLabels.add(label);
+            
+            // Count appointments for this specific date
+            String sql = "SELECT COUNT(*) FROM appointment WHERE date = ?";
+            int count = 0;
+            try {
+                count = jdbcTemplate.queryForObject(sql, Integer.class, dbDate);
+            } catch (Exception e) { count = 0; }
+            dailyAppointments.add(count);
+        }
+
+        // 4. CREATE STATS OBJECT
+        DashboardStats stats = new DashboardStats(totalUsers, totalAppointments, pendingFeedback, totalPosts, 
+                                                  ratingCounts, last7DaysLabels, dailyAppointments);
+        
         model.addAttribute("stats", stats); 
         return "admin/analytics"; 
+    }
+
+    private int getCount(String sql) {
+        try {
+            return jdbcTemplate.queryForObject(sql, Integer.class);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     @GetMapping("/forum/reports")

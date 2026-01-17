@@ -19,13 +19,20 @@
             overflow-x: hidden;
         }
 
-        /* Header Navigation */
+        /* 🟢 UPDATED HEADER: Fixed position & Glass Effect */
         .header {
-            padding: 20px 100px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 15px 50px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: white;
+            background: rgba(255, 255, 255, 0.95); /* Slight transparency */
+            backdrop-filter: blur(10px); /* Glass blur */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
         .nav-left,
@@ -46,7 +53,7 @@
         }
 
         .nav-left a:hover, .nav-right a:hover {
-            color: #0d4e57;
+            color: #F77F00; /* MindLink Orange for hover consistency */
         }
 
         .logo {
@@ -73,14 +80,13 @@
             object-fit: contain;
         }
 
-        /* Main Container */
+        /* 🟢 UPDATED CONTAINER: Added top padding so header doesn't block content */
         .container {
             background: #FFE6D0;
-            padding: 60px 100px;
-            padding-bottom: 120px;
+            padding: 130px 100px 120px; /* Increased top padding to 130px */
             position: relative;
             overflow: hidden;
-            min-height: calc(100vh - 81px);
+            min-height: 100vh;
             background-image:
                 url('${pageContext.request.contextPath}/images/background-left.png'),
                 url('${pageContext.request.contextPath}/images/background-right.png');
@@ -254,27 +260,34 @@
         /* Responsive */
         @media (max-width: 1200px) {
             .header {
-                padding: 20px 50px;
+                padding: 15px 30px; /* Adjusted for smaller screens */
             }
 
             .container {
-                padding: 50px;
+                padding: 120px 50px 50px;
                 background-size: 15% auto, 15% auto;
             }
 
             .nav-left, .nav-right {
-                gap: 40px;
+                gap: 20px;
             }
         }
 
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
-                gap: 15px;
+                gap: 10px;
+                position: static; /* Unstick on mobile if needed, or keep fixed */
+                padding: 20px;
+            }
+            
+            .container {
+                padding-top: 20px; /* Reset padding if header is static */
+                background-image: none;
             }
 
             .nav-left, .nav-right {
-                gap: 20px;
+                gap: 15px;
             }
 
             .welcome-title {
@@ -284,15 +297,10 @@
             .welcome-subtitle {
                 font-size: 28px;
             }
-
-            .container {
-                background-image: none;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Header Navigation -->
     <div class="header">
         <div class="nav-left">
             <a href="${pageContext.request.contextPath}/home">Home</a>
@@ -312,14 +320,11 @@
         </div>
     </div>
 
-    <!-- Main Container -->
     <div class="container">
-        <!-- Welcome Content -->
         <div class="welcome-content">
             <h1 class="welcome-title">Welcome back, Karen!</h1>
             <h2 class="welcome-subtitle">How are you feeling today?</h2>
 
-            <!-- Today's Mind Tip -->
             <div class="tip-box">
                 <div class="tip-header">
                     <a href="${pageContext.request.contextPath}/ai/tips" class="lightbulb-link" title="Go to Mind Tips page">
@@ -332,7 +337,6 @@
                 </p>
             </div>
 
-            <!-- Upcoming Sessions -->
             <div class="sessions-section">
                 <h3 class="sessions-title">Upcoming Session:</h3>
 
@@ -355,7 +359,6 @@
         </div>
     </div>
 
-    <!-- Fixed Chat Button -->
     <a href="${pageContext.request.contextPath}/ai/chatbot" class="chat-button">
         <img src="${pageContext.request.contextPath}/images/chatbot.png" alt="Chat with AI" class="chat-button-icon">
         <span class="chat-button-text">CHAT<br>WITH AI<br>HERE!</span>
@@ -385,4 +388,3 @@
     </script>
 </body>
 </html>
-

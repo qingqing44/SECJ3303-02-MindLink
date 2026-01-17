@@ -25,7 +25,7 @@ public class UserManagementController {
     @Autowired
     private StudentService studentService;
 
-    // Main user management dashboard - redirect to students list
+    // Main user management dashboard 
     @GetMapping
     public String index() {
         return "redirect:/admin/user-management/students";
@@ -97,7 +97,7 @@ public class UserManagementController {
                 redirectAttributes.addFlashAttribute("error", "Student ID is required.");
                 return "redirect:/admin/user-management/students/new";
             } else {
-                // Existing student - preserve created_at, set updated_at
+                // Existing student
                 studentService.getStudentById(student.getStudentId())
                         .ifPresent(existing -> student.setCreatedAt(existing.getCreatedAt()));
             }
@@ -113,7 +113,6 @@ public class UserManagementController {
                     "Student ID already exists. Please use a different Student ID.");
             return "redirect:/admin/user-management/students/new";
         } catch (Exception e) {
-            // If create failed, send back to create form; if update failed, return to edit.
             String id = student.getStudentId();
             if (id == null || id.trim().isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Error saving student: " + e.getMessage());

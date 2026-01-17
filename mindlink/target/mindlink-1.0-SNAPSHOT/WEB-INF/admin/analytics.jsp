@@ -1,374 +1,296 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>MindLink Analytics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Analytics Dashboard | MindLink Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* --- CSS STYLES --- */
         :root {
-            --bg-color: #FFF3E0; 
-            --primary-blue: #2F80ED;
-            --primary-green: #27AE60;
-            --text-dark: #333;
-            --text-grey: #666;
-            --card-bg: #FFFFFF;
+            --bg-body: #FFF3E0;       /* Admin Beige */
+            --bg-card: #FFFFFF;
+            --primary: #003049;       /* Navy Blue */
+            --secondary: #666666;     
+            --accent-orange: #F77F00;
+            --accent-pink: #F497AA;
+            --shadow: 0 4px 20px rgba(0, 48, 73, 0.08);
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-            color: var(--text-dark);
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-body); 
+            margin: 0; padding: 0; 
+            color: var(--primary);
+            overflow-x: hidden;
         }
 
-        /* Header Navigation */
+        /* --- HEADER (UNCHANGED) --- */
         .header {
-            padding: 20px 100px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            padding: 15px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-sizing: border-box;
         }
+        .nav-group { display: flex; align-items: center; gap: 40px; }
+        .nav-link { text-decoration: none; color: var(--secondary); font-weight: 500; font-size: 16px; transition: 0.3s; position: relative; }
+        .nav-link:hover, .nav-link.active { color: var(--accent-orange); }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--primary); font-size: 24px; text-decoration: none; }
+        .logo img { height: 35px; width: auto; }
 
-        .nav-left,
-        .nav-right {
-            display: flex;
-            align-items: center;
-            justify-content: space-evenly;
-            flex: 1;
-            gap: 0;
+        /* --- CONTAINER --- */
+        .container { 
+            max-width: 1100px; margin: 0 auto; 
+            padding: 120px 20px 60px; /* Top padding clears fixed header */
+            animation: fadeIn 0.5s ease-out;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .nav-left a, .nav-right a {
-            text-decoration: none;
-            color: #00313e;
-            font-size: 16px;
-            font-weight: 500;
-            transition: color 0.3s;
+        /* --- 3. BACK BUTTON (ICON ONLY) --- */
+        .btn-back {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 45px; height: 45px; border-radius: 50%;
+            background: white; color: var(--primary); font-size: 18px;
+            text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px; transition: 0.2s;
         }
+        .btn-back:hover { background: var(--accent-orange); color: white; transform: translateX(-5px); }
 
-        .nav-left a:hover, .nav-right a:hover {
-            color: #0d4e57;
-        }
+        /* --- TITLE --- */
+        .page-header { margin-bottom: 30px; }
+        .page-header h2 { font-size: 36px; font-weight: 800; margin: 0; letter-spacing: -1px; }
+        .page-header p { margin: 5px 0 0; color: var(--secondary); font-size: 16px; }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            color: #00313e;
-            font-size: 32px;
-            text-decoration: none;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        /* Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        h2 { margin-bottom: 10px; }
-        .subtitle { color: var(--text-grey); margin-bottom: 30px; font-size: 14px; }
-
-        /* Key Metrics Grid */
+        /* --- METRICS GRID --- */
         .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;
         }
 
-        .card {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            position: relative;
+        .stat-card {
+            background: var(--bg-card); border-radius: 20px; padding: 25px;
+            display: flex; align-items: center; gap: 15px;
+            box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.5);
+            transition: transform 0.2s;
         }
+        .stat-card:hover { transform: translateY(-5px); }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
+        .icon-box {
+            width: 50px; height: 50px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
         }
         
-        .card-title { font-size: 14px; font-weight: 600; color: #333; }
-        .card-icon { color: var(--text-grey); font-size: 18px; }
+        .icon-users { background: #E3F2FD; color: #1565C0; }
+        .icon-sessions { background: #FFF3E0; color: #EF6C00; }
+        .icon-posts { background: #E0F2F1; color: #00695C; }
 
-        .big-number {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 5px;
+        .stat-info { display: flex; flex-direction: column; }
+        .stat-label { font-size: 13px; color: var(--secondary); font-weight: 600; text-transform: uppercase; }
+        .stat-value { font-size: 26px; font-weight: 800; color: var(--primary); }
+
+        /* --- 5. OBVIOUS PENDING REVIEWS CARD --- */
+        .action-card {
+            /* Vibrant Gradient Background */
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: white; text-decoration: none; cursor: pointer;
+            position: relative; overflow: hidden;
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+            border: 2px solid white;
         }
-
-        .trend-tag {
+        .action-card .stat-label { color: rgba(255,255,255,0.9); }
+        .action-card .stat-value { color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .action-card .icon-box { background: rgba(255,255,255,0.2); color: white; }
+        
+        .click-hint {
+            font-size: 12px; margin-top: 5px; font-weight: 600; 
+            background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 20px;
             display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
         }
-        .trend-positive { background-color: #E6F4EA; color: var(--primary-green); }
-        .sub-text { font-size: 12px; color: var(--text-grey); margin-top: 5px; }
+        
+        .action-card:hover { transform: scale(1.05); box-shadow: 0 15px 35px rgba(255, 107, 107, 0.5); }
 
-        /* Progress Bar used in Card 2 */
-        .mini-progress {
-            height: 6px;
-            background: #eee;
-            border-radius: 3px;
-            margin-top: 10px;
-            width: 100%;
-        }
-        .mini-progress-bar {
-            height: 100%;
-            background: var(--primary-blue);
-            border-radius: 3px;
-        }
-
-        /* Section: Module Performance */
-        .performance-section {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-        }
-
-        .module-item { margin-bottom: 20px; }
-        .module-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            margin-bottom: 5px;
-        }
-        .progress-track {
-            background: #F0F0F0;
-            height: 8px;
-            border-radius: 4px;
-            width: 100%;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--primary-blue);
-            border-radius: 4px;
-        }
-
-        /* Charts Layout */
-        .chart-row {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
+        /* --- CHARTS SECTION --- */
+        .charts-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 
         .chart-card {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            background: white; border-radius: 24px; padding: 30px;
+            box-shadow: var(--shadow);
         }
-        
-        /* Utility */
-        .green-text { color: var(--primary-green); }
-        .purple-text { color: #9B51E0; }
-        
+        .chart-header { margin-bottom: 20px; }
+        .chart-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+        /* 1. Fix for unreachable graph: Ensure container has defined relative height */
+        .chart-container-fix {
+            position: relative; 
+            height: 250px; 
+            width: 100%;
+        }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .charts-wrapper { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .metrics-grid { grid-template-columns: 1fr; }
+            .header { padding: 15px 20px; }
+            .nav-group { display: none; }
+        }
     </style>
 </head>
 <body>
-<!-- Header Navigation -->
+
     <div class="header">
-        <div class="nav-left">
-            <a href="${pageContext.request.contextPath}/admin/home">Home</a>
-            <a href="${pageContext.request.contextPath}/admin/modules/dashboard">Module</a>
+        <div class="nav-group">
+            <a href="${pageContext.request.contextPath}/admin/home" class="nav-link active">Dashboard</a>
+            <a href="${pageContext.request.contextPath}/admin/modules/dashboard" class="nav-link">Modules</a>
         </div>
-        
         <a href="${pageContext.request.contextPath}/admin/home" class="logo">
-            <div class="logo-icon">
-                <img src="${pageContext.request.contextPath}/images/mindlink.png" alt="MindLink">
-            </div>
-            <span>MindLink</span>
+            <img src="${pageContext.request.contextPath}/images/mindlink.png" alt="Logo">
+            <span>MindLink Admin</span>
         </a>
-        
-        <div class="nav-right">
-            <a href="${pageContext.request.contextPath}/admin/user-management">User Management</a>
-            <a href="${pageContext.request.contextPath}/admin/profile">Profile</a>
+        <div class="nav-group">
+            <a href="${pageContext.request.contextPath}/admin/user-management" class="nav-link">Users</a>
+            <a href="${pageContext.request.contextPath}/admin/profile" class="nav-link">Profile</a>
         </div>
     </div>
 
     <div class="container">
         
-        <h2>Key Metrics</h2>
-        <p class="subtitle">Overview of platform performance and user engagement</p>
+        <a href="${pageContext.request.contextPath}/admin/home" class="btn-back" title="Back">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
+        <div class="page-header">
+            <h2>Platform Analytics</h2>
+            <p>Overview of system performance and engagement.</p>
+        </div>
 
         <div class="metrics-grid">
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Active Users</span>
-                    <span class="card-icon">👥</span>
-                </div>
-                <div class="big-number">${stats.activeUsers}</div>
-                <div class="sub-text">78.9% of total users</div>
-                <div style="margin-top:5px;">
-                    <span class="trend-tag trend-positive">+12.3% this week</span>
+            <div class="stat-card">
+                <div class="icon-box icon-users"><i class="fas fa-user-graduate"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Total Students</span>
+                    <span class="stat-value">${stats.totalUsers}</span>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Avg. Completion Rate</span>
-                    <span class="card-icon">⏱️</span>
-                </div>
-                <div class="big-number">${stats.avgCompletionRate}%</div>
-                <div class="sub-text">Across all 12 modules</div>
-                <div class="mini-progress">
-                    <div class="mini-progress-bar" style="width: ${stats.avgCompletionRate}%;"></div>
+            <div class="stat-card">
+                <div class="icon-box icon-sessions"><i class="fas fa-calendar-day"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Total Sessions</span>
+                    <span class="stat-value">${stats.totalAppointments}</span>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Module Completions</span>
-                    <span class="card-icon">📖</span>
+            <div class="stat-card">
+                <div class="icon-box icon-posts"><i class="fas fa-comment-dots"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Active Posts</span>
+                    <span class="stat-value">${stats.totalPosts}</span>
                 </div>
-                <div class="big-number">${stats.totalCompletions}</div>
-                <div class="sub-text">Total modules completed</div>
             </div>
 
-            <a href="/admin/feedback" style="text-decoration: none; color: inherit;">
-                <div class="card" style="cursor: pointer; transition: transform 0.2s;">
-                    <div class="card-header">
-                        <span class="card-title">Feedback Received</span>
-                        <span class="card-icon">💬</span>
-                    </div>
-                    <div class="big-number">${stats.feedbackReceived}</div>
-                    <div class="sub-text">Pending review</div>
-                    <div style="margin-top:5px; color: #2F80ED; font-size: 12px; font-weight: 600;">
-                        View All &rarr;
-                    </div>
+            <a href="${pageContext.request.contextPath}/admin/feedback" class="stat-card action-card">
+                <div class="icon-box"><i class="fas fa-bell"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Action Required</span>
+                    <span class="stat-value">${stats.pendingFeedback} Pending</span>
+                    <span class="click-hint">Review Now <i class="fas fa-arrow-right"></i></span>
                 </div>
             </a>
         </div>
 
-        <div class="performance-section">
-            <h2>Module Performance</h2>
-            <p class="subtitle">Completion rates by module category</p>
-
-            <div class="module-item">
-                <div class="module-info">
-                    <span>Stress Management</span>
-                    <span>892 enrolled <span class="green-text">78%</span></span>
+        <div class="charts-wrapper">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Appointment Activity (Last 7 Days)</div>
                 </div>
-                <div class="progress-track"><div class="progress-fill" style="width: 78%;"></div></div>
+                <div class="chart-container-fix">
+                    <canvas id="activityChart"></canvas>
+                </div>
             </div>
 
-            <div class="module-item">
-                <div class="module-info">
-                    <span>Anxiety Support</span>
-                    <span>756 enrolled <span class="green-text">72%</span></span>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Rating Distribution</div>
                 </div>
-                <div class="progress-track"><div class="progress-fill" style="width: 72%;"></div></div>
-            </div>
-
-            <div class="module-item">
-                <div class="module-info">
-                    <span>Mindfulness & Meditation</span>
-                    <span>923 enrolled <span class="green-text">81%</span></span>
+                <div class="chart-container-fix" style="height: 220px; display: flex; justify-content: center;">
+                    <canvas id="ratingChart"></canvas>
                 </div>
-                <div class="progress-track"><div class="progress-fill" style="width: 81%;"></div></div>
             </div>
-        </div>
-
-        <div class="chart-card" style="margin-bottom: 30px;">
-            <h2>Weekly Activity Overview</h2>
-            <p class="subtitle">User engagement and module completions for the past week</p>
-            <canvas id="weeklyActivityChart" height="100"></canvas>
-        </div>
-
-        <div class="chart-card">
-            <h2>Monthly Trends</h2>
-            <p class="subtitle">Growth and engagement trends over the past 7 months</p>
-            <canvas id="monthlyTrendsChart" height="100"></canvas>
         </div>
 
     </div>
 
     <script>
-        // Chart 1: Weekly Activity (Line Chart)
-        const ctxWeekly = document.getElementById('weeklyActivityChart').getContext('2d');
-        new Chart(ctxWeekly, {
+        // Data Injection with Fallbacks to prevent graph breaking
+        const rawLabels = '${stats.chartLabels}'; 
+        const rawData = '${stats.dailyAppointments}';
+        const rawRatings = '${stats.ratingCounts}';
+
+        // Default data if server returns empty strings
+        const chartLabels = (rawLabels && rawLabels.length > 2) ? JSON.parse(rawLabels) : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const chartData = (rawData && rawData.length > 2) ? JSON.parse(rawData) : [0, 0, 0, 0, 0, 0, 0];
+        const ratingData = (rawRatings && rawRatings.length > 2) ? JSON.parse(rawRatings) : [1, 1, 1, 1, 1]; // Dummy data to show chart exists if empty
+
+        // 1. Activity Chart
+        const ctxActivity = document.getElementById('activityChart').getContext('2d');
+        // Simple Gradient
+        let gradient = ctxActivity.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(0, 48, 73, 0.3)'); 
+        gradient.addColorStop(1, 'rgba(0, 48, 73, 0.0)');
+
+        new Chart(ctxActivity, {
             type: 'line',
             data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                datasets: [
-                    {
-                        label: 'Active Users',
-                        data: [900, 1050, 1200, 1150, 950, 780, 850],
-                        borderColor: '#2F80ED',
-                        backgroundColor: 'rgba(47, 128, 237, 0.1)',
-                        tension: 0.4,
-                        fill: false
-                    },
-                    {
-                        label: 'Completions',
-                        data: [250, 300, 290, 300, 270, 220, 240],
-                        borderColor: '#27AE60',
-                        tension: 0.4,
-                        fill: false
-                    }
-                ]
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Appointments',
+                    data: chartData,
+                    borderColor: '#003049',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#F77F00',
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.3
+                }]
             },
             options: {
                 responsive: true,
-                plugins: { legend: { position: 'bottom' } },
+                maintainAspectRatio: false, // Important for fitting container
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, max: 1300 }
+                    y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                    x: { grid: { display: false } }
                 }
             }
         });
 
-        // Chart 2: Monthly Trends (Bar Chart)
-        const ctxMonthly = document.getElementById('monthlyTrendsChart').getContext('2d');
-        new Chart(ctxMonthly, {
-            type: 'bar',
+        // 2. Rating Chart
+        const ctxRating = document.getElementById('ratingChart').getContext('2d');
+        new Chart(ctxRating, {
+            type: 'doughnut',
             data: {
-                labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
-                datasets: [
-                    {
-                        label: 'Active Users',
-                        data: [850, 900, 1100, 1200, 1300, 1450, 1250],
-                        backgroundColor: '#2F80ED'
-                    },
-                    {
-                        label: 'Total Completions',
-                        data: [1800, 2100, 2400, 2800, 3000, 3300, 2900],
-                        backgroundColor: '#27AE60'
-                    }
-                ]
+                labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+                datasets: [{
+                    data: ratingData,
+                    backgroundColor: ['#FF6B6B', '#FF9F43', '#FFCD56', '#48C9B0', '#003049'],
+                    borderWidth: 0
+                }]
             },
             options: {
                 responsive: true,
-                plugins: { legend: { position: 'bottom' } },
-                scales: { y: { beginAtZero: true } }
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } }
             }
         });
     </script>

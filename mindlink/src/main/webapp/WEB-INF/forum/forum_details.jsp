@@ -529,8 +529,6 @@
             <div style="margin-bottom: 32px;">
                 <div class="section-header">
                     <h2 class="section-title">Pinned Posts</h2>
-                    <a href="${pageContext.request.contextPath}/forum/create?forumId=${forum.id}" class="new-discussion-btn">+ New Discussion</a>
-                </div>
 
                 <div class="pinned-card">
                     <div class="pinned-main">

@@ -183,11 +183,11 @@
             <h1>Begin your journey to <br> earning achievements <br> and self-improvement!</h1>
             
             <div class="button-group">
-                <a href="/gamification/achievements" class="btn-action">
+                <a href="${pageContext.request.contextPath}/gamification/achievements" class="btn-action">
                     View Achievements &nbsp; &rarr;
                 </a>
 
-                <a href="/gamification/activities" class="btn-action">
+                <a href="${pageContext.request.contextPath}/gamification/activities" class="btn-action">
                     View My Activities &nbsp; &rarr;
                 </a>
             </div>

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 //student view assessment
-import com.mindlink.assessment.dao.AssessmentDao;
+import com.mindlink.admin.dao.AssessmentDao;
 
 @Controller
 
@@ -25,6 +25,18 @@ public class AssessmentController {
 
     @GetMapping
     public String dashboard() {
+        return "assessment/welcome";
+    }
+
+    @GetMapping("/select-module")
+    public String moduleSelect(Model model) {
+        // Fetch distinct assessment titles for selection
+        List<Assessment> allAssessments = assessmentDao.findAll();
+        List<String> assessmentTitles = allAssessments.stream()
+            .map(Assessment::getTitle)
+            .distinct()
+            .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("assessmentTitles", assessmentTitles);
         return "assessment/dashboard";
     }
 

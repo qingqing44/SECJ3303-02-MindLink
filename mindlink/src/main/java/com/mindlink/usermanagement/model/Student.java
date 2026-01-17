@@ -18,8 +18,6 @@ public class Student {
     public Student() {
     }
 
-    // Getters and Setters
-
     public String getStudentId() {
         return studentId;
     }

@@ -138,7 +138,7 @@
         <div class="dashboard-card">
             
             <div class="card-header">
-                <a href="/gamification" class="back-btn">
+                <a href="${pageContext.request.contextPath}/gamification" class="back-btn">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 14L4 9l5-5"/>
                         <path d="M4 9h10c4 0 7 3 7 7v1"/>

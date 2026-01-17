@@ -234,8 +234,11 @@
                         <button type="button" class="btn-add" onclick="addOption()">+ Add Option</button>
                     </div>
 
+                    <c:if test="${moduleId != null}">
+                        <input type="hidden" name="moduleId" value="${moduleId}" />
+                    </c:if>
                     <button type="submit" class="btn-save">Save Question</button>
-                    <a href="${pageContext.request.contextPath}/admin/assessment"
+                    <a href="${pageContext.request.contextPath}/admin/assessment/list${moduleId != null ? '?moduleId=' : ''}${moduleId != null ? moduleId : ''}"
                         style="display:block; text-align:center; margin-top:20px; color:#666; text-decoration:none;">Cancel</a>
                 </form>
             </div>

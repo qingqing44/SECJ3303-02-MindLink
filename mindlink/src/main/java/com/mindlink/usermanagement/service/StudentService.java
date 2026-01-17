@@ -58,7 +58,6 @@ public class StudentService {
         if (student.getStatus() == null || student.getStatus().isEmpty()) {
             student.setStatus("PENDING");
         }
-        // Plain text password
         studentDao.save(student);
     }
 
@@ -73,7 +72,6 @@ public class StudentService {
             int nextNum = maxNum + 1;
             return String.format("S%03d", nextNum);
         } catch (Exception e) {
-            // Fallback: if query fails, start from S001
             return "S001";
         }
     }

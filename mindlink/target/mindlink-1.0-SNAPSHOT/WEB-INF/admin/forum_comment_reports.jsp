@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <title>Reported Comments - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg-color: #FFF3E0;
@@ -89,20 +90,22 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
             background: white;
-            border: 1px solid #e0e0e0;
-            text-decoration: none;
-            font-size: 20px;
             color: var(--text-dark);
-            transition: all 0.2s;
+            font-size: 18px;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            transition: 0.2s;
         }
 
         .back-btn:hover {
-            transform: translateX(-2px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #F77F00;
+            color: white;
+            transform: translateX(-5px);
         }
 
         h1 {

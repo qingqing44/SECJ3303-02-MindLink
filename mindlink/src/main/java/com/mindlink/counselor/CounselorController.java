@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession; 
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.*;
+import java.io.IOException;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/counselor") 
@@ -33,8 +37,6 @@ public class CounselorController {
     @Autowired
     private SessionFeedbackService sessionFeedbackService;
 
-    @Qualifier("counselingFeedbackService")
-
     // --- 1. DASHBOARD ---
     @GetMapping({"/home", "/dashboard"})
     public String showDashboard(HttpSession session, Model model) {
@@ -43,16 +45,13 @@ public class CounselorController {
             return "redirect:/login";
         }
 
-        // Fetch ONLY this counselor's appointments for the dashboard
-        // We pass 'null' for filters to get the basic list
         model.addAttribute("appointments", 
             appointmentService.getAppointmentsForCounselor(loggedIn.getName(), null, null));
 
         return "counselor/home"; 
     }
 
-    // --- 2. APPOINTMENTS PAGE (Replaces Schedule) ---
-    // Matches the Navbar link: /counselor/appointments
+    // --- 2. APPOINTMENTS PAGE ---
     @GetMapping("/appointments")
     public String showAppointments(
             @RequestParam(value = "search", required = false) String search,
@@ -65,11 +64,9 @@ public class CounselorController {
             return "redirect:/login";
         }
 
-        // Fetch filtered list based on Counselor Name + Search + Status
         model.addAttribute("appointments", 
             appointmentService.getAppointmentsForCounselor(loggedIn.getName(), search, status));
 
-        // Pass current filters back to JSP so inputs remain filled
         model.addAttribute("currentSearch", search);
         model.addAttribute("currentStatus", status);
 
@@ -85,51 +82,83 @@ public class CounselorController {
         return "counselor/profile"; 
     }
 
-    // --- 4. HANDLE UPDATE PROFILE ---
+    // --- 4. HANDLE UPDATE PROFILE (FIXED) ---
     @PostMapping("/updateProfile")
-    public String updateProfile(@ModelAttribute Counselor updatedCounselor, 
-                                HttpSession session, 
+    public String updateProfile(@ModelAttribute Counselor formData, // This only has fields from the form
+                                @RequestParam("imageFile") MultipartFile imageFile,
+                                @RequestParam(value = "existingImage", required = false) String existingImage,
+                                HttpSession session,
                                 RedirectAttributes redirectAttributes) {
         
-        Counselor currentSessionUser = (Counselor) session.getAttribute("loggedInCounselor");
-        if (currentSessionUser == null) {
-            return "redirect:/login";
-        }
-
         try {
-            counselorService.updateCounselor(updatedCounselor);
+            Counselor existingCounselor = counselorService.getCounselorById(formData.getId()); 
             
-            // Update Session so new name/photo appears immediately
-            session.setAttribute("loggedInCounselor", updatedCounselor);
+            if (existingCounselor == null) {
+                throw new RuntimeException("Counselor not found in database");
+            }
+
+            existingCounselor.setName(formData.getName());
+            existingCounselor.setEmail(formData.getEmail());
+            existingCounselor.setPassword(formData.getPassword());
+            existingCounselor.setLocation(formData.getLocation());
+            existingCounselor.setUniversity(formData.getUniversity());
+            existingCounselor.setEducation(formData.getEducation());
+            existingCounselor.setLanguages(formData.getLanguages());
+            existingCounselor.setQuote(formData.getQuote());
+            existingCounselor.setBio(formData.getBio());
+
+            if (!imageFile.isEmpty()) {
+                String uploadDir = "src/main/webapp/images/uploads/"; 
+                String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+                Path uploadPath = Paths.get(uploadDir);
+
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                try (var inputStream = imageFile.getInputStream()) {
+                    Files.copy(inputStream, uploadPath.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+                }
+
+                existingCounselor.setImageUrl("/images/uploads/" + fileName);
+            } else {
+                // If no new image, ensure we keep the old one (which is already in existingCounselor)
+                // No action needed here, existingCounselor.imageUrl is already set from DB
+            }
+
+            // 🟢 STEP 4: Save the MERGED object
+            counselorService.updateCounselor(existingCounselor);
             
-            redirectAttributes.addFlashAttribute("message", "Profile updated successfully!");
+            // 🟢 STEP 5: Update the Session with the FULL object
+            session.setAttribute("loggedInCounselor", existingCounselor);
+            
+            return "redirect:/counselor/profile?success=true";
 
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Error updating profile.");
+            redirectAttributes.addFlashAttribute("error", "Error saving profile: " + e.getMessage());
+            return "redirect:/counselor/profile";
         }
-
-        return "redirect:/counselor/profile";
     }
 
     // --- 5. VIEW APPOINTMENT DETAILS ---
     @GetMapping("/appointment")
     public String showAppointmentDetails(@RequestParam("id") String id, HttpSession session, Model model) {
-    if (session.getAttribute("loggedInCounselor") == null) {
-        return "redirect:/login";
-    }
+        if (session.getAttribute("loggedInCounselor") == null) {
+            return "redirect:/login";
+        }
 
-    Appointment appointment = appointmentService.getAppointmentById(id);
-    if (appointment == null) {
-        return "redirect:/counselor/appointments";
-    }
+        Appointment appointment = appointmentService.getAppointmentById(id);
+        if (appointment == null) {
+            return "redirect:/counselor/appointments";
+        }
 
-    model.addAttribute("appointment", appointment);
+        model.addAttribute("appointment", appointment);
 
-    Feedback feedback = sessionFeedbackService.getFeedbackByAppointmentId(id);
-    model.addAttribute("feedback", feedback);
+        Feedback feedback = sessionFeedbackService.getFeedbackByAppointmentId(id);
+        model.addAttribute("feedback", feedback);
 
-    return "counselor/appointment_details"; 
+        return "counselor/appointment_details"; 
     }
 
     // --- 6. ADD NOTES & COMPLETING SESSION ---
@@ -146,10 +175,10 @@ public class CounselorController {
         
         if (isComplete) {
             redirectAttributes.addFlashAttribute("message", "Session completed successfully!");
-            return "redirect:/counselor/appointments"; // Go back to list
+            return "redirect:/counselor/appointments"; 
         } else {
             redirectAttributes.addFlashAttribute("message", "Notes saved successfully.");
-            return "redirect:/counselor/appointment?id=" + id; // Stay on the same page
+            return "redirect:/counselor/appointment?id=" + id; 
         }
     }
 }

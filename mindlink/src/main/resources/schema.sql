@@ -464,7 +464,8 @@ CREATE TABLE IF NOT EXISTS feedback (
     subject VARCHAR(255),
     message TEXT,
     rating INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    admin_reply TEXT
 );
 
 -- Sample Data for Assessment (Stress Test)
@@ -502,3 +503,158 @@ INSERT INTO ass_question (assessment_id, option_text, score_value) VALUES
 
 INSERT INTO feedback (id, booking_id, category, subject, message, rating, created_at) VALUES 
 (2, 'BK003', 'Counselor Behavior', 'Nice Counselor', 'I love this counselor!', 5, '2026-01-14 07:29:20');
+
+-- Assessment Table: Stores questions for assessments
+CREATE TABLE IF NOT EXISTS assessment (
+    assessment_id INT AUTO_INCREMENT PRIMARY KEY,
+    assessment_title VARCHAR(255) NOT NULL,
+    question_text TEXT NOT NULL,
+    question_type VARCHAR(50) DEFAULT 'Multiple Choice'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Assessment Question/Option Table: Stores options for each question
+CREATE TABLE IF NOT EXISTS ass_question (
+    option_id INT AUTO_INCREMENT PRIMARY KEY,
+    assessment_id INT NOT NULL,
+    option_text VARCHAR(255) NOT NULL,
+    score_value INT NOT NULL,
+    FOREIGN KEY (assessment_id) REFERENCES assessment(assessment_id) ON DELETE CASCADE,
+    INDEX idx_assessment_id (assessment_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS feedback (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id VARCHAR(50),
+    category VARCHAR(100),
+    subject VARCHAR(255),
+    message TEXT,
+    rating INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Sample Data for Assessment (Stress Test)
+INSERT INTO assessment (assessment_title, question_text) VALUES 
+('Stress Test', 'How often do you feel overwhelmed by your workload?'),
+('Stress Test', 'Do you find it difficult to relax after work/study?'),
+('Stress Test', 'How often do you get headaches or physical tension?'),
+('Stress Test', 'How often do you find that you cannot cope with all the things you have to do?', 'multiple_choice'),
+('Stress Test', 'How often do you feel you are on top of things?', 'multiple_choice'),
+('Stress Test', 'How often do you feel angered because of things that happened outside of your control?', 'multiple_choice'),
+('Stress Test', 'How often do you feel that difficulties are piling up so high that you cannot overcome them?', 'multiple_choice'),
+('Stress Test', 'How often do you experience physical symptoms of stress (e.g., headaches, stomach aches)?', 'multiple_choice'),
+('Stress Test', 'How often do you have trouble falling or staying asleep due to racing thoughts?', 'multiple_choice'),
+('Stress Test', 'How often do you feel overwhelmed by your academic or daily responsibilities?', 'multiple_choice');
+
+-- Options for Question 1 (IDs will assume 1, 2, 3 based on auto-increment, but for safety in scripts usually we'd need to look them up. 
+-- For this demo, assuming sequential insertion starting at 1).
+-- Q1: Overwhelmed
+INSERT INTO ass_question (assessment_id, option_text, score_value) VALUES 
+(1, 'Never', 0), (1, 'Sometimes', 5), (1, 'Often', 10);
+
+-- Q2: Difficult to relax
+INSERT INTO ass_question (assessment_id, option_text, score_value) VALUES 
+(2, 'No, I relax easily', 0), (2, 'Sometimes', 5), (2, 'Yes, very difficult', 10);
+
+-- Q3: Physical tension
+INSERT INTO ass_question (assessment_id, option_text, score_value) VALUES 
+(3, 'Rarely', 0), (3, 'Occasionally', 5), (3, 'Frequently', 10),
+(6, 'Never', 0), (104, 'Rarely', 3), (104, 'Often', 7), (104, 'Always', 10),
+(7, 'Always', 0), (105, 'Often', 3), (105, 'Rarely', 7), (105, 'Never', 10),
+(8, 'Never', 0), (106, 'Rarely', 3), (106, 'Often', 7), (106, 'Always', 10),
+(9, 'Never', 0), (107, 'Rarely', 3), (107, 'Often', 7), (107, 'Always', 10),
+(10, 'Never', 0), (108, 'Rarely', 3), (108, 'Often', 7), (108, 'Always', 10),
+(11, 'Never', 0), (109, 'Rarely', 3), (109, 'Often', 7), (109, 'Always', 10),
+(12, 'Never', 0), (110, 'Rarely', 3), (110, 'Often', 7), (110, 'Always', 10);
+
+
+-- Sample Data for Assessment (Happiness Check)
+INSERT INTO assessment (assessment_title, question_text) VALUES 
+('Happiness Check', 'I feel satisfied with my life currently.'),
+('Happiness Check', 'I find joy in small things.'),
+('Happiness Check', 'In most ways, my life is close to my ideal.', 'multiple_choice'),
+('Happiness Check', 'The conditions of my life are excellent.', 'multiple_choice'),
+('Happiness Check', 'I am satisfied with my life.', 'multiple_choice'),
+('Happiness Check', 'So far, I have gotten the important things I want in life.', 'multiple_choice'),
+('Happiness Check', 'If I could live my life over, I would change almost nothing.', 'multiple_choice'),
+('Happiness Check', 'I feel optimistic about my future.', 'multiple_choice'),
+('Happiness Check', 'I feel that I have a sense of purpose in what I do.', 'multiple_choice'),
+('Happiness Check', 'I enjoy the small things in my daily life.', 'multiple_choice'),
+('Happiness Check', 'I feel energetic and motivated most days.', 'multiple_choice');
+
+-- Q4: Satisfied (ID 4)
+INSERT INTO ass_question (assessment_id, option_text, score_value) VALUES 
+(4, 'Strongly Disagree', 0), (4, 'Neutral', 5), (4, 'Strongly Agree', 10);
+
+-- Q5: Joy (ID 5)
+INSERT INTO ass_question (assessment_id, option_text, score_value) VALUES 
+(5, 'Rarely', 0), (5, 'Sometimes', 5), (5, 'Always', 10),
+(13, 'Strongly Disagree', 0), (13, 'Disagree', 3), (13, 'Agree', 7), (13, 'Strongly Agree', 10),
+(14, 'Strongly Disagree', 0), (14, 'Disagree', 3), (14, 'Agree', 7), (14, 'Strongly Agree', 10),
+(15, 'Strongly Disagree', 0), (15, 'Disagree', 3), (15, 'Agree', 7), (15, 'Strongly Agree', 10),
+(16, 'Strongly Disagree', 0), (16, 'Disagree', 3), (16, 'Agree', 7), (16, 'Strongly Agree', 10),
+(17, 'Strongly Disagree', 0), (17, 'Disagree', 3), (17, 'Agree', 7), (17, 'Strongly Agree', 10),
+(18, 'Strongly Disagree', 0), (18, 'Disagree', 3), (18, 'Agree', 7), (18, 'Strongly Agree', 10),
+(19, 'Strongly Disagree', 0), (19, 'Disagree', 3), (19, 'Agree', 7), (19, 'Strongly Agree', 10),
+(20, 'Strongly Disagree', 0), (20, 'Disagree', 3), (20, 'Agree', 7), (20, 'Strongly Agree', 10),
+(21, 'Strongly Disagree', 0), (21, 'Disagree', 3), (21, 'Agree', 7), (21, 'Strongly Agree', 10),
+(22, 'Strongly Disagree', 0), (22, 'Disagree', 3), (22, 'Agree', 7), (22, 'Strongly Agree', 10);
+
+INSERT INTO feedback (id, booking_id, category, subject, message, rating, created_at) VALUES 
+(2, 'BK003', 'Counselor Behavior', 'Nice Counselor', 'I love this counselor!', 5, '2026-01-14 07:29:20');
+
+CREATE TABLE IF NOT EXISTS student_achievements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(100) NOT NULL,
+    achievement_type VARCHAR(100) NOT NULL, -- e.g., 'WELLNESS_WARRIOR'
+    unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_student_ach (student_id, achievement_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO student_achievements (student_id, achievement_type, unlocked_at) VALUES
+('S001', 'MIND_EXPLORER', '2025-01-10 10:30:00'),
+('S001', 'WELLNESS_WARRIOR', '2025-01-12 14:45:00'),
+('S002', 'MIND_EXPLORER', '2025-01-11 09:20:00'),
+('S001', 'BALANCED_MIND', '2025-01-11 10:30:49'),
+('S001', 'RESILIENCE_BUILDER', '2025-01-15 10:50:49'),
+('S001', 'TINY_TRIUMPH', '2025-02-13 11:00:49'),
+('S001', 'STEADY_START', '2025-02-25 08:50:45'),
+('S001', 'FIRST_STEP_FORWARD', '2025-02-25 09:40:45'),
+('S001', 'INNER_PEACE', '2025-01-25 19:40:45');
+
+-- New table to track daily logins
+CREATE TABLE IF NOT EXISTS user_logins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(100),
+    login_date DATE,
+    FOREIGN KEY (student_id) REFERENCES student(student_id),
+    UNIQUE KEY (student_id, login_date)
+);
+
+-- Insert 3 new "Locked" milestones for users to work towards
+-- These will now appear in your activities list
+INSERT INTO student_achievements (student_id, achievement_type, unlocked_at) VALUES
+('S001', 'FORUM_MASTER', NULL),        -- Milestone for posting in forum
+('S001', 'CONSISTENT_CALM', NULL),     -- Milestone for 7-day login streak
+('S001', 'FEEDBACK_FANATIC', NULL),    -- Milestone for providing feedback
+('S001', 'FORUM_PARTICIPANT', NULL),   -- Goal: Post in the forum
+('S001', 'DAILY_ZEN', NULL),           -- Goal: Log in for a 7-day streak
+('S001', 'FEEDBACK_PROVIDER', NULL),   -- Goal: Rate a counselor session
+('S001', 'KNOWLEDGE_SEEKER', NULL);    -- Goal: Read all learning modules
+
+-- Update Assessment Table to include module_id
+ALTER TABLE assessment ADD COLUMN module_id INT AFTER assessment_id;
+
+-- Add Foreign Key constraint
+ALTER TABLE assessment 
+ADD CONSTRAINT fk_assessment_module 
+FOREIGN KEY (module_id) REFERENCES module(module_id) ON DELETE CASCADE;
+
+-- Create index for faster filtering
+CREATE INDEX idx_assessment_module_id ON assessment(module_id);
+
+-- Update Stress Test to belong to Module 1
+UPDATE assessment SET module_id = 1 WHERE assessment_title = 'Stress Test';
+
+-- Update Happiness Check to belong to Module 2
+UPDATE assessment SET module_id = 2 WHERE assessment_title = 'Happiness Check';

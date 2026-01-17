@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <title>Forum Reports - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg-color: #FFF3E0;
@@ -90,22 +91,22 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
             background: white;
-            border: 1px solid #e0e0e0;
-            text-decoration: none;
-            font-size: 20px;
             color: var(--text-dark);
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 18px;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            transition: 0.2s;
         }
 
         .back-btn:hover {
-            background: #f9f9f9;
-            border-color: #00313e;
-            transform: translateX(-2px);
+            background: #F77F00;
+            color: white;
+            transform: translateX(-5px);
         }
 
         h1 {
@@ -309,11 +310,12 @@
     </div>
 
     <div class="container">
+        <a href="${pageContext.request.contextPath}/admin/forum/posts" class="back-btn" title="Back to Forum Posts">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
         <div class="page-header">
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <a href="${pageContext.request.contextPath}/admin/forum/posts" class="back-btn" title="Back to Forum Posts">←</a>
-                <h1>Reported Posts</h1>
-            </div>
+            <h1>Reported Posts</h1>
         </div>
 
         <div class="table-container">

@@ -61,7 +61,7 @@ public class CounselorManagementController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error saving counselor: " + e.getMessage());
         }
-        return "redirect:/admin/user-management/students"; // Redirect back to student list
+        return "redirect:/admin/user-management/students"; 
     }
 
     @GetMapping("/delete/{id}")
@@ -72,7 +72,7 @@ public class CounselorManagementController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error deleting counselor: " + e.getMessage());
         }
-        return "redirect:/admin/user-management/students"; // Redirect back to student list
+        return "redirect:/admin/user-management/students"; 
     }
 
     @GetMapping("/requests")

@@ -177,9 +177,20 @@
             <div class="container">
 
                 <div class="header-title-section">
-                    <h1>Mental Health Assessment</h1>
+                    <div>
+                        <c:if test="${moduleId != null && selectedModule != null}">
+                            <a href="${pageContext.request.contextPath}/admin/assessment/select-module" 
+                               style="text-decoration: none; color: #666; font-size: 14px; margin-bottom: 10px; display: inline-block;">
+                                ← Back to Module Selection
+                            </a>
+                            <h1>${selectedModule.title} - Assessment</h1>
+                        </c:if>
+                        <c:if test="${moduleId == null || selectedModule == null}">
+                            <h1>Mental Health Assessment</h1>
+                        </c:if>
+                    </div>
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <a href="${pageContext.request.contextPath}/admin/assessment/add" class="btn-add"
+                        <a href="${pageContext.request.contextPath}/admin/assessment/add${moduleId != null ? '?moduleId=' : ''}${moduleId != null ? moduleId : ''}" class="btn-add"
                             style="text-decoration:none;">+</a>
                     </div>
                 </div>
@@ -202,10 +213,10 @@
                         </div>
 
                         <div class="actions">
-                            <a href="${pageContext.request.contextPath}/admin/assessment/edit?id=${q.id}"
+                            <a href="${pageContext.request.contextPath}/admin/assessment/edit?id=${q.id}${moduleId != null ? '&moduleId=' : ''}${moduleId != null ? moduleId : ''}"
                                 class="action-icon">✎</a>
 
-                            <a href="${pageContext.request.contextPath}/admin/assessment/delete?id=${q.id}"
+                            <a href="${pageContext.request.contextPath}/admin/assessment/delete?id=${q.id}${moduleId != null ? '&moduleId=' : ''}${moduleId != null ? moduleId : ''}"
                                 class="action-icon delete-icon" onclick="return confirm('Delete this question?')">🗑</a>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
     <!DOCTYPE html>
     <html lang="en">
 
@@ -192,12 +193,20 @@
         </div>
 
         <!-- Main Container -->
-        <div class="container">
-            <!-- Center Content -->
-            <div class="welcome-content">
-                <h1 class="welcome-title">Let’s get start with <br> mental health <br> assessment!</h1>
-                <a href="${pageContext.request.contextPath}/assessment/questions?title=Stress Test"
-                    class="btn-start">Get Started &nbsp; &rarr;</a>
+        <div class="container" style="text-align: center; padding: 60px 100px;">
+            <h1 style="font-size: 48px; color: #003049; font-weight: 800; margin-bottom: 20px;">Select Assessment</h1>
+            <p style="font-size: 18px; color: #666; margin-bottom: 40px;">Choose an assessment to begin:</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto;">
+                <c:forEach items="${assessmentTitles}" var="title">
+                    <a href="${pageContext.request.contextPath}/assessment/questions?title=${title}" 
+                       style="background: white; padding: 30px; border-radius: 20px; text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: block;">
+                        <h3 style="margin: 0; font-size: 20px; color: #003049;">${title}</h3>
+                    </a>
+                </c:forEach>
+                <c:if test="${empty assessmentTitles}">
+                    <p style="grid-column: 1 / -1; color: #666;">No assessments available at this time.</p>
+                </c:if>
             </div>
         </div>
 

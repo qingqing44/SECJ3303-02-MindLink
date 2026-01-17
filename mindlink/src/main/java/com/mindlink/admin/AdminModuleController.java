@@ -29,7 +29,7 @@ public class AdminModuleController {
         return "redirect:/admin/modules/dashboard";
     }
 
-    // 2. Module Dashboard (admin view of all modules)
+    // 2. Module Dashboard 
     @GetMapping("/dashboard")
     public String showModuleDashboard(Model model) {
         try {
@@ -44,7 +44,7 @@ public class AdminModuleController {
         }
     }
 
-    // 3. Module Intro (admin view of specific module with questions)
+    // 3. Module Intro 
     @GetMapping("/intro")
     public String showModuleIntro(@RequestParam(value = "id", required = false) String id, Model model) {
         if (id != null) {
@@ -53,12 +53,6 @@ public class AdminModuleController {
                 model.addAttribute("module", module);
                 return "admin/module_intro";
             }
-        }
-        // Fallback: get first module if no ID provided
-        var modules = moduleService.getAllModules();
-        if (!modules.isEmpty()) {
-            model.addAttribute("module", modules.get(0));
-            return "admin/module_intro";
         }
         return "redirect:/admin/modules/dashboard";
     }
@@ -82,7 +76,7 @@ public class AdminModuleController {
         return "admin/module_form";
     }
 
-    // 6. Save (Create or Update)
+    // 6. Save 
     @PostMapping("/save")
     public String saveModule(@ModelAttribute LearningModule module) {
         moduleService.saveModule(module);
@@ -97,7 +91,7 @@ public class AdminModuleController {
     }
 
     // QUESTION MANAGEMENT
-    // 8. Add Question Form
+    // 8. Add Question 
     @GetMapping("/questions/add")
     public String showAddQuestionForm(@RequestParam("moduleId") int moduleId, Model model) {
         ModuleQuestion question = new ModuleQuestion();
@@ -110,26 +104,31 @@ public class AdminModuleController {
         return "admin/question_form";
     }
 
-    // 9. Edit Question Form
+    // 9. Edit 
     @GetMapping("/questions/edit")
     public String showEditQuestionForm(@RequestParam("id") int questionId, Model model) {
-        ModuleQuestion question = moduleService.getQuestionById(questionId);
-        if (question != null) {
-            model.addAttribute("question", question);
-            model.addAttribute("moduleId", question.getModuleId());
-            return "admin/question_form";
+        try {
+            ModuleQuestion question = moduleService.getQuestionById(questionId);
+            if (question != null) {
+                model.addAttribute("question", question);
+                model.addAttribute("moduleId", question.getModuleId());
+                return "admin/question_form";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Error loading question: " + e.getMessage());
         }
         return "redirect:/admin/modules/dashboard";
     }
 
-    // 10. Save Question
+    // 10. Save 
     @PostMapping("/questions/save")
     public String saveQuestion(@ModelAttribute ModuleQuestion question) {
         moduleService.saveQuestion(question);
         return "redirect:/admin/modules/dashboard";
     }
 
-    // 11. Delete Question
+    // 11. Delete
     @GetMapping("/questions/delete")
     public String deleteQuestion(@RequestParam("id") int questionId) {
         moduleService.deleteQuestion(questionId);

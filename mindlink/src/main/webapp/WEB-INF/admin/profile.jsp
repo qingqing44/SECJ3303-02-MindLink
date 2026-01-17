@@ -126,6 +126,36 @@
         }
         .btn-edit:hover { opacity: 0.9; }
 
+        /* Logout Button */
+        .btn-logout {
+            background-color: #D62828;
+            color: white;
+            width: 300px;
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto 0 auto;
+            transition: 0.2s;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-logout:hover {
+            opacity: 0.9;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 60px;
+        }
+
     </style>
 </head>
 <body>
@@ -231,7 +261,10 @@
             </script>
         </div>
 
-        <a href="${pageContext.request.contextPath}/admin/profile/edit" class="btn-edit" style="text-decoration: none; text-align: center;">Edit</a>
+        <div class="button-container">
+            <a href="${pageContext.request.contextPath}/admin/profile/edit" class="btn-edit" style="text-decoration: none; text-align: center;">Edit</a>
+            <a href="${pageContext.request.contextPath}/logout" class="btn-logout">Logout</a>
+        </div>
 
     </div>
 
