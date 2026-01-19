@@ -286,6 +286,7 @@ INSERT INTO counselor (id, name, email, password, location, education, universit
 ('C002', 'Mr. Ryan Lin', 'ryan.lin@utm.my', 'counselor123', 'Block A Room 301', 'M.Sc. Counseling', 'UPM', 'English, Hokkien', 'Cognitive behavioral therapy', 'Focused on behavioral adjustments and mental clarity.', 'Change starts within.', 'ryan.jpg', '013-9876543', 'CERT-2024-002', 'approved'),
 ('C003', 'Ms. Nur Alya', 'nur.alya@utm.my', 'counselor123', 'Block B Room 314', 'PhD in Psychology', 'UKM', 'Malay, English', 'Anxiety and mood disorders', 'Expert in helping students manage anxiety and mood fluctuations.', 'Healing takes time.', 'nur.jpg', '014-5678901', 'CERT-2024-003', 'approved'),
 ('C004', 'Ms. Evelyn Reed', 'evelyn.reed@utm.my', 'counselor123', 'Block A Room 301', 'M.Sc. Counseling', 'UPM', 'English', 'Adjustment issues', 'Helping students navigate campus life transitions.', 'Guidance for every step.', 'evelyn.jpg', '016-1122334', 'CERT-2024-004', 'approved');
+('C005', 'Dr. Adam Lim', 'adam.lim@utm.my', 'counselor123', 'Block C Room 210', 'PhD in Counseling Psychology', 'UTM', 'English, Malay', 'Stress management, career guidance', 'Passionate about supporting student mental health and career development.', 'Your growth is my mission.', 'adam.jpg', '017-4455667', 'CERT-2024-005', 'pending');
 
 -- Appointments
 INSERT INTO appointment (id, student_id, counselor_name, date, time, type, venue, status) VALUES
@@ -340,6 +341,18 @@ INSERT INTO forum_post (forum_id, user_id, user_name, content, status, is_anonym
 INSERT INTO module (title, description, image_path) VALUES
 ('Introduction to Mental Health', 'Learn the basics of mental health, reduce stigma, and understand emotional well-being.', 'mental-health-intro.png'),
 ('Emotional Awareness and Regulation', 'Recognize your emotions, understand their causes, and develop healthy strategies to manage them effectively in daily and social situations.', 'emotional-awareness.png');
+
+-- Sample Module Questions (using VD, PDF, Quiz, Interactive)
+INSERT INTO module_question (module_id, chapter_number, question_number, question_text, question_type) VALUES
+(1, 1, '1.1', 'Watch the introduction video on mental health basics.', 'VD'),
+(1, 1, '1.2', 'Read the PDF on key components of emotional well-being.', 'PDF'),
+(1, 2, '2.1', 'Take the short quiz to test your understanding of stress management.', 'Quiz'),
+(1, 2, '2.2', 'Complete the interactive exercise on identifying stress triggers.', 'Interactive'),
+(2, 1, '1.1', 'Watch the video on emotional awareness techniques.', 'VD'),
+(2, 1, '1.2', 'Read the PDF about regulating your emotions in daily life.', 'PDF'),
+(2, 2, '2.1', 'Take the quiz on coping strategies for negative emotions.', 'Quiz'),
+(2, 2, '2.2', 'Participate in the interactive scenario exercise on emotional regulation.', 'Interactive');
+
 
 -- Assessments
 INSERT INTO assessment (set_id, assessment_title, question_text) VALUES 

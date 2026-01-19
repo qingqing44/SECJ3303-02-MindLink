@@ -118,8 +118,7 @@
                     alt="MindLink Logo">MindLink</div>
             <p class="subtitle">Create an account to start your journey.</p>
 
-            <form action="/register/submit" method="post">
-
+        <form action="${pageContext.request.contextPath}/register/submit" method="post">
                 <div class="form-group">
                     <label>Student ID</label>
                     <input type="text" name="studentId" placeholder="e.g. S12345" required>
@@ -149,7 +148,7 @@
             </form>
 
             <div class="signin-link">
-                Already have an account? <a href="/login">Sign in</a>
+                Already have an account? <a href="${pageContext.request.contextPath}/login">Sign in</a>
             </div>
         </div>
 
