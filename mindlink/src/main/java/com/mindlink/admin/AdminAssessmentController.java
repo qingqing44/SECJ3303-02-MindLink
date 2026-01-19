@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import com.mindlink.admin.dao.AssessmentDao;
+import com.mindlink.assessment.dao.AssessmentDao;
 import com.mindlink.assessment.Assessment;
 import com.mindlink.assessment.AssessmentOption;
-import com.mindlink.module.ModuleService;
 
 @Controller
 @RequestMapping("/admin/assessment")
@@ -20,24 +20,25 @@ public class AdminAssessmentController {
     @Autowired
     private AssessmentDao assessmentDao;
 
-    @Autowired
-    private ModuleService moduleService; 
-
     @GetMapping
     public String listQuestions(Model model) {
         // Redirect to module select page first
         return "redirect:/admin/assessment/select-module";
     }
-    
+
     @GetMapping("/list")
-    public String showList(@RequestParam(value = "moduleId", required = false) Integer moduleId, Model model) {
+    public String showList(@RequestParam(value = "moduleId", required = false) Integer moduleId,
+            @RequestParam(value = "search", required = false) String search,
+            Model model) {
         List<Assessment> questions;
         if (moduleId != null) {
-            questions = assessmentDao.findByModuleId(moduleId);
-            // Get module info for display
-            com.mindlink.module.LearningModule module = moduleService.getModuleById(String.valueOf(moduleId));
-            if (module != null) {
-                model.addAttribute("selectedModule", module);
+            questions = assessmentDao.findBySetId(moduleId, search);
+            // Always get the title from the DAO or the first question
+            String title = assessmentDao.getSetTitle(moduleId);
+            if (title != null) {
+                model.addAttribute("selectedModuleTitle", title);
+            } else if (!questions.isEmpty()) {
+                model.addAttribute("selectedModuleTitle", questions.get(0).getTitle());
             }
         } else {
             questions = assessmentDao.findAll();
@@ -46,17 +47,15 @@ public class AdminAssessmentController {
         List<AdminAssessment> adminQuestions = convertToAdminAssessment(questions);
         model.addAttribute("questions", adminQuestions);
         model.addAttribute("moduleId", moduleId);
+        model.addAttribute("search", search);
         return "admin/assessment_list";
     }
 
     @GetMapping("/select-module")
-    public String moduleSelect(Model model) {
-        try {
-            List<com.mindlink.module.LearningModule> modules = moduleService.getAllModules();
-            model.addAttribute("modules", modules);
-        } catch (Exception e) {
-            model.addAttribute("modules", new ArrayList<>());
-        }
+    public String moduleSelect(@RequestParam(value = "search", required = false) String search, Model model) {
+        List<Map<String, Object>> sets = assessmentDao.findAllSets(search);
+        model.addAttribute("sets", sets);
+        model.addAttribute("search", search);
         return "admin/assessment_module_select";
     }
 
@@ -64,8 +63,13 @@ public class AdminAssessmentController {
     public String addQuestionForm(@RequestParam(value = "moduleId", required = false) Integer moduleId, Model model) {
         AdminAssessment assessment = new AdminAssessment();
         if (moduleId != null) {
-            assessment.setModuleId(moduleId);
+            assessment.setSetId(moduleId);
+            // Pre-fill the title from existing set
+            String title = assessmentDao.getSetTitle(moduleId);
+            assessment.setTitle(title);
             model.addAttribute("moduleId", moduleId);
+        } else {
+            model.addAttribute("isNewSet", true);
         }
         model.addAttribute("assessment", assessment);
         return "admin/assessment_form";
@@ -73,7 +77,22 @@ public class AdminAssessmentController {
 
     @PostMapping("/save")
     public String saveQuestion(@ModelAttribute AdminAssessment adminAssessment,
-                               @RequestParam(value = "moduleId", required = false) Integer moduleId) {
+            @RequestParam(value = "moduleId", required = false) Integer moduleId) {
+
+        if (moduleId == null
+                && (adminAssessment.getQuestionText() == null || adminAssessment.getQuestionText().trim().isEmpty())) {
+            // Creating a new Set
+            int newSetId = assessmentDao.getNextSetId();
+            Assessment assessment = new Assessment();
+            assessment.setSetId(newSetId);
+            assessment.setTitle(adminAssessment.getTitle());
+            assessment.setQuestionText("Introduction"); // Placeholder
+            assessment.setQuestionType("multiple_choice");
+            // No options for set placeholder
+            assessmentDao.save(assessment);
+            return "redirect:/admin/assessment/list?moduleId=" + newSetId;
+        }
+
         // Convert AdminAssessment to Assessment
         Assessment assessment = convertToAssessment(adminAssessment, moduleId);
         assessmentDao.save(assessment);
@@ -84,13 +103,13 @@ public class AdminAssessmentController {
     }
 
     @GetMapping("/edit")
-    public String editQuestionForm(@RequestParam("id") int id, 
-                                   @RequestParam(value = "moduleId", required = false) Integer moduleId,
-                                   Model model) {
+    public String editQuestionForm(@RequestParam("id") int id,
+            @RequestParam(value = "moduleId", required = false) Integer moduleId,
+            Model model) {
         Assessment assessment = assessmentDao.findById(id);
         AdminAssessment adminAssessment = convertToAdminAssessment(assessment);
         if (moduleId != null) {
-            adminAssessment.setModuleId(moduleId);
+            adminAssessment.setSetId(moduleId);
             model.addAttribute("moduleId", moduleId);
         }
         model.addAttribute("assessment", adminAssessment);
@@ -99,7 +118,7 @@ public class AdminAssessmentController {
 
     @PostMapping("/update")
     public String updateQuestion(@ModelAttribute AdminAssessment adminAssessment,
-                                @RequestParam(value = "moduleId", required = false) Integer moduleId) {
+            @RequestParam(value = "moduleId", required = false) Integer moduleId) {
         Assessment assessment = convertToAssessment(adminAssessment, moduleId);
         assessment.setId(adminAssessment.getId());
         assessmentDao.update(assessment);
@@ -111,7 +130,7 @@ public class AdminAssessmentController {
 
     @GetMapping("/delete")
     public String deleteQuestion(@RequestParam("id") int id,
-                                @RequestParam(value = "moduleId", required = false) Integer moduleId) {
+            @RequestParam(value = "moduleId", required = false) Integer moduleId) {
         assessmentDao.delete(id);
         if (moduleId != null) {
             return "redirect:/admin/assessment/list?moduleId=" + moduleId;
@@ -119,15 +138,31 @@ public class AdminAssessmentController {
         return "redirect:/admin/assessment/select-module";
     }
 
+    // Set CRUD
+    @PostMapping("/set/update-title")
+    public String updateSetTitle(@RequestParam("setId") int setId,
+            @RequestParam("oldTitle") String oldTitle,
+            @RequestParam("newTitle") String newTitle) {
+        assessmentDao.updateSetTitle(setId, oldTitle, newTitle);
+        return "redirect:/admin/assessment/select-module";
+    }
+
+    @GetMapping("/set/delete")
+    public String deleteSet(@RequestParam("setId") int setId, @RequestParam("title") String title) {
+        assessmentDao.deleteSet(setId, title);
+        return "redirect:/admin/assessment/select-module";
+    }
+
     // Helper methods to convert between models
     private AdminAssessment convertToAdminAssessment(Assessment assessment) {
-        if (assessment == null) return null;
-        
+        if (assessment == null)
+            return null;
+
         AdminAssessment adminAssessment = new AdminAssessment();
         adminAssessment.setId(assessment.getId());
         adminAssessment.setTitle(assessment.getTitle());
         adminAssessment.setQuestionText(assessment.getQuestionText());
-        
+
         // Convert AssessmentOption to AdminAssessment.Option
         List<AdminAssessment.Option> options = new ArrayList<>();
         if (assessment.getOptions() != null) {
@@ -141,7 +176,7 @@ public class AdminAssessmentController {
             }
         }
         adminAssessment.setOptions(options);
-        
+
         return adminAssessment;
     }
 
@@ -153,15 +188,17 @@ public class AdminAssessmentController {
         return adminAssessments;
     }
 
-    private Assessment convertToAssessment(AdminAssessment adminAssessment, Integer moduleId) {
-        if (adminAssessment == null) return null;
-        
+    private Assessment convertToAssessment(AdminAssessment adminAssessment, Integer setId) {
+        if (adminAssessment == null)
+            return null;
+
         Assessment assessment = new Assessment();
         assessment.setId(adminAssessment.getId());
+        assessment.setSetId(setId != null ? setId : adminAssessment.getSetId());
         assessment.setTitle(adminAssessment.getTitle());
         assessment.setQuestionText(adminAssessment.getQuestionText());
         assessment.setQuestionType("multiple_choice");
-        
+
         // Convert AdminAssessment.Option to AssessmentOption
         List<AssessmentOption> options = new ArrayList<>();
         if (adminAssessment.getOptions() != null) {
@@ -175,7 +212,7 @@ public class AdminAssessmentController {
             }
         }
         assessment.setOptions(options);
-        
+
         return assessment;
     }
 }

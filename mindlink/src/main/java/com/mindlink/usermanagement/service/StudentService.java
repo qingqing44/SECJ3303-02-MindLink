@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.mindlink.usermanagement.dao.StudentDao;
@@ -16,9 +15,6 @@ public class StudentService {
 
     @Autowired
     private StudentDao studentDao;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     public List<Student> getAllStudents() {
         return studentDao.findAll();
@@ -59,21 +55,6 @@ public class StudentService {
             student.setStatus("PENDING");
         }
         studentDao.save(student);
-    }
-
-    private String generateNextStudentId() {
-        // Find the highest student ID that matches pattern S###
-        String sql = "SELECT MAX(CAST(SUBSTRING(student_id, 2) AS UNSIGNED)) FROM student WHERE student_id REGEXP '^S[0-9]+$'";
-        try {
-            Integer maxNum = jdbcTemplate.queryForObject(sql, Integer.class);
-            if (maxNum == null) {
-                maxNum = 0;
-            }
-            int nextNum = maxNum + 1;
-            return String.format("S%03d", nextNum);
-        } catch (Exception e) {
-            return "S001";
-        }
     }
 
     public void deleteStudent(String id) {

@@ -86,8 +86,8 @@
                 overflow: hidden;
 
                 /* Use Assessment Images as background, matching Home pattern */
-                background-image: url('${pageContext.request.contextPath}/images/assessment_left.png'),
-                url('${pageContext.request.contextPath}/images/assessment_right.png');
+                background-image: url('${pageContext.request.contextPath}/images/assessment-left.png'),
+                url('${pageContext.request.contextPath}/images/assessment-right.png');
 
                 /* Adjust positions to look good (similar to left bottom/right bottom but tailored for these images) */
                 background-position: left center, right center;
@@ -196,7 +196,12 @@
             <!-- Center Content -->
             <div class="welcome-content">
                 <h1 class="welcome-title">Let’s get start with <br> mental health <br> assessment!</h1>
-                <a href="${pageContext.request.contextPath}/assessment/select-module" class="btn-start">Get Started &nbsp; &rarr;</a>
+                <div style="display: flex; gap: 20px; justify-content: center;">
+                    <a href="${pageContext.request.contextPath}/assessment/select-module" class="btn-start">Get Started
+                        &nbsp; &rarr;</a>
+                    <a href="${pageContext.request.contextPath}/assessment/history" class="btn-start">View History
+                        &nbsp; 📜</a>
+                </div>
             </div>
         </div>
 
@@ -208,7 +213,7 @@
                 setTimeout(function () {
                     container.style.transition = 'opacity 0.8s';
                     container.style.opacity = '1';
-                }, 100);
+                }, 1000);
             });
         </script>
     </body>

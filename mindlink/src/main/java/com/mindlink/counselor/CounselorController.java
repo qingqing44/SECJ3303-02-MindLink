@@ -1,14 +1,15 @@
 package com.mindlink.counselor;
 
+import com.mindlink.assessment.AssessmentResult;
+import com.mindlink.assessment.CounselorAssessmentService;
 import com.mindlink.counseling.Appointment;
-import com.mindlink.counseling.AppointmentService; 
-import com.mindlink.counseling.CounselorService; 
-import com.mindlink.counseling.Counselor; 
+import com.mindlink.counseling.AppointmentService;
+import com.mindlink.counseling.CounselorService;
+import com.mindlink.counseling.Counselor;
 import com.mindlink.counseling.SessionFeedbackService;
 import com.mindlink.counseling.Feedback;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,14 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.servlet.http.HttpSession; 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.*;
-import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/counselor") 
+@RequestMapping("/counselor")
 public class CounselorController {
 
     @Autowired
@@ -37,18 +38,21 @@ public class CounselorController {
     @Autowired
     private SessionFeedbackService sessionFeedbackService;
 
+    @Autowired
+    private CounselorAssessmentService assessmentService;
+
     // --- 1. DASHBOARD ---
-    @GetMapping({"/home", "/dashboard"})
+    @GetMapping({ "/home", "/dashboard" })
     public String showDashboard(HttpSession session, Model model) {
         Counselor loggedIn = (Counselor) session.getAttribute("loggedInCounselor");
         if (loggedIn == null) {
             return "redirect:/login";
         }
 
-        model.addAttribute("appointments", 
-            appointmentService.getAppointmentsForCounselor(loggedIn.getName(), null, null));
+        model.addAttribute("appointments",
+                appointmentService.getAppointmentsForCounselor(loggedIn.getName(), null, null));
 
-        return "counselor/home"; 
+        return "counselor/home";
     }
 
     // --- 2. APPOINTMENTS PAGE ---
@@ -56,21 +60,21 @@ public class CounselorController {
     public String showAppointments(
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "status", required = false) String status,
-            HttpSession session, 
+            HttpSession session,
             Model model) {
-        
+
         Counselor loggedIn = (Counselor) session.getAttribute("loggedInCounselor");
         if (loggedIn == null) {
             return "redirect:/login";
         }
 
-        model.addAttribute("appointments", 
-            appointmentService.getAppointmentsForCounselor(loggedIn.getName(), search, status));
+        model.addAttribute("appointments",
+                appointmentService.getAppointmentsForCounselor(loggedIn.getName(), search, status));
 
         model.addAttribute("currentSearch", search);
         model.addAttribute("currentStatus", status);
 
-        return "counselor/appointments"; 
+        return "counselor/appointments";
     }
 
     // --- 3. VIEW PROFILE PAGE ---
@@ -79,20 +83,20 @@ public class CounselorController {
         if (session.getAttribute("loggedInCounselor") == null) {
             return "redirect:/login";
         }
-        return "counselor/profile"; 
+        return "counselor/profile";
     }
 
     // --- 4. HANDLE UPDATE PROFILE (FIXED) ---
     @PostMapping("/updateProfile")
     public String updateProfile(@ModelAttribute Counselor formData, // This only has fields from the form
-                                @RequestParam("imageFile") MultipartFile imageFile,
-                                @RequestParam(value = "existingImage", required = false) String existingImage,
-                                HttpSession session,
-                                RedirectAttributes redirectAttributes) {
-        
+            @RequestParam("imageFile") MultipartFile imageFile,
+            @RequestParam(value = "existingImage", required = false) String existingImage,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
         try {
-            Counselor existingCounselor = counselorService.getCounselorById(formData.getId()); 
-            
+            Counselor existingCounselor = counselorService.getCounselorById(formData.getId());
+
             if (existingCounselor == null) {
                 throw new RuntimeException("Counselor not found in database");
             }
@@ -108,7 +112,7 @@ public class CounselorController {
             existingCounselor.setBio(formData.getBio());
 
             if (!imageFile.isEmpty()) {
-                String uploadDir = "src/main/webapp/images/uploads/"; 
+                String uploadDir = "src/main/webapp/images/uploads/";
                 String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
                 Path uploadPath = Paths.get(uploadDir);
 
@@ -122,16 +126,15 @@ public class CounselorController {
 
                 existingCounselor.setImageUrl("/images/uploads/" + fileName);
             } else {
-                // If no new image, ensure we keep the old one (which is already in existingCounselor)
-                // No action needed here, existingCounselor.imageUrl is already set from DB
+
             }
 
             // 🟢 STEP 4: Save the MERGED object
             counselorService.updateCounselor(existingCounselor);
-            
+
             // 🟢 STEP 5: Update the Session with the FULL object
             session.setAttribute("loggedInCounselor", existingCounselor);
-            
+
             return "redirect:/counselor/profile?success=true";
 
         } catch (Exception e) {
@@ -158,7 +161,7 @@ public class CounselorController {
         Feedback feedback = sessionFeedbackService.getFeedbackByAppointmentId(id);
         model.addAttribute("feedback", feedback);
 
-        return "counselor/appointment_details"; 
+        return "counselor/appointment_details";
     }
 
     // --- 6. ADD NOTES & COMPLETING SESSION ---
@@ -168,17 +171,41 @@ public class CounselorController {
             @RequestParam("notes") String notes,
             @RequestParam(value = "action", required = false) String action,
             RedirectAttributes redirectAttributes) {
-        
+
         boolean isComplete = "complete".equals(action);
-        
+
         appointmentService.updateSessionNotes(id, notes, isComplete);
-        
+
         if (isComplete) {
             redirectAttributes.addFlashAttribute("message", "Session completed successfully!");
-            return "redirect:/counselor/appointments"; 
+            return "redirect:/counselor/appointments";
         } else {
             redirectAttributes.addFlashAttribute("message", "Notes saved successfully.");
-            return "redirect:/counselor/appointment?id=" + id; 
+            return "redirect:/counselor/appointment?id=" + id;
         }
+    }
+
+    // --- 7. VIEW ASSESSMENT RESULTS WITH FILTERS ---
+    @GetMapping("/assessments")
+    public String showAssessments(
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "risk", required = false) String risk,
+            @RequestParam(value = "search", required = false) String search,
+            HttpSession session, 
+            Model model) {
+        
+        if (session.getAttribute("loggedInCounselor") == null) {
+            return "redirect:/login";
+        }
+
+        // Now this method exists because we are using CounselorAssessmentService
+        List<AssessmentResult> results = assessmentService.getAssessmentResults(type, risk, search);
+
+        model.addAttribute("assessments", results);
+        model.addAttribute("currentType", type);
+        model.addAttribute("currentRisk", risk);
+        model.addAttribute("currentSearch", search);
+
+        return "counselor/assessment_results";
     }
 }

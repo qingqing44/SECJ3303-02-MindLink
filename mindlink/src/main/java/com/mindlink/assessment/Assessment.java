@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Assessment {
     private int id;
+    private int setId;
     private String title;
     private String questionText;
     private String questionType;
@@ -13,8 +14,9 @@ public class Assessment {
     public Assessment() {
     }
 
-    public Assessment(int id, String title, String questionText, String questionType) {
+    public Assessment(int id, int setId, String title, String questionText, String questionType) {
         this.id = id;
+        this.setId = setId;
         this.title = title;
         this.questionText = questionText;
         this.questionType = questionType;
@@ -26,6 +28,14 @@ public class Assessment {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getSetId() {
+        return setId;
+    }
+
+    public void setSetId(int setId) {
+        this.setId = setId;
     }
 
     public String getTitle() {
@@ -58,5 +68,57 @@ public class Assessment {
 
     public void setOptions(List<AssessmentOption> options) {
         this.options = options;
+    }
+
+    // Static nested class for detailed history answers
+    public static class AnswerSnapshot {
+        private int answerId;
+        private int historyId;
+        private String questionText;
+        private String selectedOption;
+        private int score;
+
+        public AnswerSnapshot() {
+        }
+
+        public int getAnswerId() {
+            return answerId;
+        }
+
+        public void setAnswerId(int answerId) {
+            this.answerId = answerId;
+        }
+
+        public int getHistoryId() {
+            return historyId;
+        }
+
+        public void setHistoryId(int historyId) {
+            this.historyId = historyId;
+        }
+
+        public String getQuestionText() {
+            return questionText;
+        }
+
+        public void setQuestionText(String questionText) {
+            this.questionText = questionText;
+        }
+
+        public String getSelectedOption() {
+            return selectedOption;
+        }
+
+        public void setSelectedOption(String selectedOption) {
+            this.selectedOption = selectedOption;
+        }
+
+        public int getScore() {
+            return score;
+        }
+
+        public void setScore(int score) {
+            this.score = score;
+        }
     }
 }

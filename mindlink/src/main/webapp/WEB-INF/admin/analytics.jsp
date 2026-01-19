@@ -29,25 +29,65 @@
         }
 
         /* --- HEADER (UNCHANGED) --- */
-        .header {
-            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
-            padding: 15px 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            box-sizing: border-box;
-        }
-        .nav-group { display: flex; align-items: center; gap: 40px; }
-        .nav-link { text-decoration: none; color: var(--secondary); font-weight: 500; font-size: 16px; transition: 0.3s; position: relative; }
-        .nav-link:hover, .nav-link.active { color: var(--accent-orange); }
-        .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--primary); font-size: 24px; text-decoration: none; }
-        .logo img { height: 35px; width: auto; }
+                .header {
+                padding: 20px 100px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: white;
+            }
+
+            .nav-left,
+            .nav-right {
+                display: flex;
+                align-items: center;
+                justify-content: space-evenly;
+                flex: 1;
+                gap: 0;
+            }
+
+            .nav-left a,
+            .nav-right a {
+                text-decoration: none;
+                color: #00313e;
+                font-size: 16px;
+                font-weight: 500;
+                transition: color 0.3s;
+            }
+
+            .nav-left a:hover,
+            .nav-right a:hover {
+                color: #0d4e57;
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-weight: 700;
+                color: #00313e;
+                font-size: 32px;
+                text-decoration: none;
+            }
+
+            .logo-icon {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .logo-icon img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
 
         /* --- CONTAINER --- */
         .container { 
-            max-width: 1100px; margin: 0 auto; 
-            padding: 120px 20px 60px; /* Top padding clears fixed header */
+            max-width: 1100px; margin: 50px auto 0 auto; 
+            padding: 10 40px; /* Top padding clears fixed header */
             animation: fadeIn 0.5s ease-out;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -147,17 +187,21 @@
 <body>
 
     <div class="header">
-        <div class="nav-group">
-            <a href="${pageContext.request.contextPath}/admin/home" class="nav-link active">Dashboard</a>
-            <a href="${pageContext.request.contextPath}/admin/modules/dashboard" class="nav-link">Modules</a>
+        <div class="nav-left">
+            <a href="${pageContext.request.contextPath}/admin/home">Home</a>
+            <a href="${pageContext.request.contextPath}/admin/modules/dashboard">Module</a>
         </div>
+
         <a href="${pageContext.request.contextPath}/admin/home" class="logo">
-            <img src="${pageContext.request.contextPath}/images/mindlink.png" alt="Logo">
-            <span>MindLink Admin</span>
+            <div class="logo-icon">
+                <img src="${pageContext.request.contextPath}/images/mindlink.png" alt="MindLink">
+            </div>
+            <span>MindLink</span>
         </a>
-        <div class="nav-group">
-            <a href="${pageContext.request.contextPath}/admin/user-management" class="nav-link">Users</a>
-            <a href="${pageContext.request.contextPath}/admin/profile" class="nav-link">Profile</a>
+
+        <div class="nav-right">
+            <a href="${pageContext.request.contextPath}/admin/user-management">User Management</a>
+            <a href="${pageContext.request.contextPath}/admin/profile">Profile</a>
         </div>
     </div>
 

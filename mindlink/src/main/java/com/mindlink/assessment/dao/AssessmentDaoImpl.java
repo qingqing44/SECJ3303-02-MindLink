@@ -1,4 +1,4 @@
-package com.mindlink.admin.dao;
+package com.mindlink.assessment.dao;
 
 import com.mindlink.assessment.Assessment;
 import com.mindlink.assessment.AssessmentOption;
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class AssessmentDaoImpl implements AssessmentDao {
@@ -23,6 +24,7 @@ public class AssessmentDaoImpl implements AssessmentDao {
         public Assessment mapRow(ResultSet rs, int rowNum) throws SQLException {
             Assessment assessment = new Assessment();
             assessment.setId(rs.getInt("assessment_id"));
+            assessment.setSetId(rs.getInt("set_id"));
             assessment.setTitle(rs.getString("assessment_title"));
             assessment.setQuestionText(rs.getString("question_text"));
             assessment.setQuestionType(rs.getString("question_type"));
@@ -60,10 +62,6 @@ public class AssessmentDaoImpl implements AssessmentDao {
     public List<Assessment> findAll() {
         String sql = "SELECT * FROM assessment";
         List<Assessment> assessments = jdbcTemplate.query(sql, assessmentRowMapper);
-        // Loading options for list view might be heavy if many questions,
-        // but user probably wants to see them or at least counting them.
-        // For admin list, we can just fetch options too or lazy load.
-        // Let's fetch them for now to be safe.
         for (Assessment assessment : assessments) {
             String optionSql = "SELECT * FROM ass_question WHERE assessment_id = ?";
             List<AssessmentOption> options = jdbcTemplate.query(optionSql, optionRowMapper, assessment.getId());
@@ -73,9 +71,33 @@ public class AssessmentDaoImpl implements AssessmentDao {
     }
 
     @Override
-    public List<Assessment> findByModuleId(int moduleId) {
-        String sql = "SELECT * FROM assessment WHERE module_id = ?";
-        List<Assessment> assessments = jdbcTemplate.query(sql, assessmentRowMapper, moduleId);
+    public List<Assessment> findBySetId(int setId) {
+        return findBySetId(setId, null);
+    }
+
+    public List<Assessment> findBySetId(int setId, String search) {
+        String sql;
+        Object[] params;
+
+        if (setId == -1) {
+            sql = "SELECT * FROM assessment WHERE set_id IS NULL";
+            if (search != null && !search.trim().isEmpty()) {
+                sql += " AND question_text LIKE ?";
+                params = new Object[] { "%" + search + "%" };
+            } else {
+                params = new Object[] {};
+            }
+        } else {
+            sql = "SELECT * FROM assessment WHERE set_id = ?";
+            if (search != null && !search.trim().isEmpty()) {
+                sql += " AND question_text LIKE ?";
+                params = new Object[] { setId, "%" + search + "%" };
+            } else {
+                params = new Object[] { setId };
+            }
+        }
+
+        List<Assessment> assessments = jdbcTemplate.query(sql, assessmentRowMapper, params);
         for (Assessment assessment : assessments) {
             String optionSql = "SELECT * FROM ass_question WHERE assessment_id = ?";
             List<AssessmentOption> options = jdbcTemplate.query(optionSql, optionRowMapper, assessment.getId());
@@ -100,14 +122,15 @@ public class AssessmentDaoImpl implements AssessmentDao {
 
     @Override
     public void save(Assessment assessment) {
-        String sql = "INSERT INTO assessment (assessment_title, question_text, question_type) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO assessment (set_id, assessment_title, question_text, question_type) VALUES (?, ?, ?, ?)";
         org.springframework.jdbc.support.KeyHolder keyHolder = new org.springframework.jdbc.support.GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            java.sql.PreparedStatement ps = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, assessment.getTitle());
-            ps.setString(2, assessment.getQuestionText());
-            ps.setString(3, assessment.getQuestionType());
+            java.sql.PreparedStatement ps = connection.prepareStatement(sql, new String[] { "assessment_id" });
+            ps.setInt(1, assessment.getSetId());
+            ps.setString(2, assessment.getTitle());
+            ps.setString(3, assessment.getQuestionText());
+            ps.setString(4, assessment.getQuestionType());
             return ps;
         }, keyHolder);
 
@@ -124,8 +147,9 @@ public class AssessmentDaoImpl implements AssessmentDao {
 
     @Override
     public void update(Assessment assessment) {
-        String sql = "UPDATE assessment SET assessment_title = ?, question_text = ?, question_type = ? WHERE assessment_id = ?";
-        jdbcTemplate.update(sql, assessment.getTitle(), assessment.getQuestionText(), assessment.getQuestionType(),
+        String sql = "UPDATE assessment SET set_id = ?, assessment_title = ?, question_text = ?, question_type = ? WHERE assessment_id = ?";
+        jdbcTemplate.update(sql, assessment.getSetId(), assessment.getTitle(), assessment.getQuestionText(),
+                assessment.getQuestionType(),
                 assessment.getId());
 
         // Replace options
@@ -142,11 +166,64 @@ public class AssessmentDaoImpl implements AssessmentDao {
 
     @Override
     public void delete(int id) {
-        // Delete options first (if no cascade)
         String deleteOptions = "DELETE FROM ass_question WHERE assessment_id = ?";
         jdbcTemplate.update(deleteOptions, id);
 
         String sql = "DELETE FROM assessment WHERE assessment_id = ?";
         jdbcTemplate.update(sql, id);
+    }
+
+    @Override
+    public List<Map<String, Object>> findAllSets(String search) {
+        String sql = "SELECT COALESCE(set_id, -1) as set_id, assessment_title, COUNT(*) as question_count FROM assessment";
+        Object[] params = null;
+        if (search != null && !search.trim().isEmpty()) {
+            sql += " WHERE assessment_title LIKE ?";
+            params = new Object[] { "%" + search + "%" };
+        }
+        sql += " GROUP BY set_id, assessment_title";
+
+        if (params != null) {
+            return jdbcTemplate.queryForList(sql, params);
+        } else {
+            return jdbcTemplate.queryForList(sql);
+        }
+    }
+
+    @Override
+    public void deleteSet(int setId, String title) {
+        // Delete all options first
+        String deleteOptions = "DELETE FROM ass_question WHERE assessment_id IN (SELECT assessment_id FROM assessment WHERE set_id = ? AND assessment_title = ?)";
+        jdbcTemplate.update(deleteOptions, setId, title);
+
+        String deleteQuestions = "DELETE FROM assessment WHERE set_id = ? AND assessment_title = ?";
+        jdbcTemplate.update(deleteQuestions, setId, title);
+    }
+
+    @Override
+    public void updateSetTitle(int setId, String oldTitle, String newTitle) {
+        String sql = "UPDATE assessment SET assessment_title = ? WHERE set_id = ?";
+        jdbcTemplate.update(sql, newTitle, setId);
+    }
+
+    @Override
+    public String getSetTitle(int setId) {
+        String sql = "SELECT assessment_title FROM assessment WHERE set_id = ? LIMIT 1";
+        try {
+            return jdbcTemplate.queryForObject(sql, String.class, setId);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public int getNextSetId() {
+        String sql = "SELECT MAX(set_id) FROM assessment";
+        try {
+            Integer maxId = jdbcTemplate.queryForObject(sql, Integer.class);
+            return (maxId == null) ? 1 : maxId + 1;
+        } catch (Exception e) {
+            return 1;
+        }
     }
 }

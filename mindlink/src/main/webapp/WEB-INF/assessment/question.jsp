@@ -1,10 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+        <!DOCTYPE html>
         <html lang="en">
 
         <head>
             <meta charset="UTF-8">
-            <title>Expression Analysis</title>
+            <title>MindLink - ${title}</title>
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
                 rel="stylesheet">
             <style>
@@ -15,6 +16,18 @@
                     --highlight: #4E8692;
                     --btn-green: #86E393;
                     --btn-red: #FF6B6B;
+
+                    --current-page: $ {
+                        currentPage
+                    }
+
+                    ;
+
+                    --total-pages: $ {
+                        totalPages
+                    }
+
+                    ;
                 }
 
                 * {
@@ -23,11 +36,10 @@
                     padding: 0;
                 }
 
+                /* Glassmorphism & Animations */
                 body {
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    background-color: var(--bg-color);
-                    margin: 0;
-                    padding: 0;
+                    background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
                     color: var(--text-dark);
                 }
 
@@ -46,7 +58,6 @@
                     align-items: center;
                     justify-content: space-evenly;
                     flex: 1;
-                    gap: 0;
                 }
 
                 .nav-left a,
@@ -55,12 +66,6 @@
                     color: #00313e;
                     font-size: 16px;
                     font-weight: 500;
-                    transition: color 0.3s;
-                }
-
-                .nav-left a:hover,
-                .nav-right a:hover {
-                    color: #0d4e57;
                 }
 
                 .logo {
@@ -73,205 +78,242 @@
                     text-decoration: none;
                 }
 
-                .logo-icon {
+                .logo-icon img {
                     width: 40px;
                     height: 40px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
                 }
 
-                .logo-icon img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: contain;
-                }
-
-                /* Main Container */
+                /* Container & Card */
                 .container {
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     min-height: calc(100vh - 81px);
-                    /* minus header */
                     padding: 40px;
                 }
 
-                /* The White Card */
                 .assessment-card {
-                    background: white;
-                    width: 1000px;
+                    background: rgba(255, 255, 255, 0.7);
+                    backdrop-filter: blur(15px);
+                    -webkit-backdrop-filter: blur(15px);
+                    width: 100%;
+                    max-width: 750px;
                     border-radius: 40px;
-                    padding: 40px;
+                    padding: 50px;
                     position: relative;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    animation: cardEntry 0.6s cubic-bezier(0.22, 1, 0.36, 1);
                 }
 
-                /* Header Elements */
+                @keyframes cardEntry {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px) scale(0.95);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
                 .close-btn {
                     position: absolute;
-                    top: 40px;
-                    left: 40px;
-                    width: 40px;
-                    height: 40px;
+                    top: 30px;
+                    left: 30px;
+                    width: 36px;
+                    height: 36px;
                     background-color: var(--btn-red);
                     border-radius: 50%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     color: white;
-                    font-weight: bold;
-                    font-size: 20px;
                     text-decoration: none;
-                    cursor: pointer;
+                    font-weight: bold;
+                    transition: transform 0.2s;
+                    z-index: 10;
                 }
 
-                .progress-pill {
+                .close-btn:hover {
+                    transform: rotate(90deg) scale(1.1);
+                }
+
+                /* Progress Bar */
+                .progress-container {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 8px;
+                    background: rgba(0, 0, 0, 0.05);
+                    border-radius: 40px 40px 0 0;
+                    overflow: hidden;
+                }
+
+                .progress-fill {
+                    height: 100%;
+                    background: linear-gradient(90deg, var(--input-bg), var(--highlight));
+                    width: calc((var(--current-page) / var(--total-pages)) * 100%);
+                    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                .progress-text {
                     position: absolute;
                     top: 40px;
                     right: 40px;
-                    background-color: var(--input-bg);
-                    color: white;
-                    padding: 8px 20px;
-                    border-radius: 20px;
-                    font-weight: 600;
+                    font-weight: 700;
+                    color: var(--input-bg);
                     font-size: 14px;
+                    letter-spacing: 1px;
                 }
 
                 .card-header {
                     text-align: center;
-                    margin-bottom: 40px;
+                    margin-bottom: 45px;
                 }
 
                 h1 {
-                    font-size: 32px;
+                    font-size: 34px;
                     font-weight: 800;
-                    margin-bottom: 10px;
+                    margin-bottom: 12px;
+                    background: linear-gradient(to right, var(--text-dark), var(--input-bg));
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    -webkit-text-fill-color: transparent;
                 }
 
-                .subtitle {
-                    color: #666;
-                    font-size: 16px;
-                }
-
-                /* Content Layout */
-                .content-row {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 50px;
+                .question-block {
                     margin-bottom: 40px;
-                }
-
-                .illustration img {
-                    width: 250px;
-                    height: auto;
-                }
-
-                /* Input Area Styling */
-                .input-box {
-                    background-color: var(--input-bg);
+                    padding: 25px;
+                    background: rgba(255, 255, 255, 0.4);
                     border-radius: 20px;
-                    padding: 30px;
-                    width: 450px;
-                    position: relative;
+                    border: 1px solid rgba(255, 255, 255, 0.5);
+                    transition: all 0.3s;
                 }
 
-                textarea {
-                    width: 100%;
-                    height: 150px;
-                    background: transparent;
-                    border: none;
-                    color: white;
-                    font-size: 20px;
-                    font-family: inherit;
-                    resize: none;
-                    outline: none;
-                    line-height: 1.5;
+                .question-block:hover {
+                    transform: translateX(10px);
+                    background: rgba(255, 255, 255, 0.6);
                 }
 
-                textarea::placeholder {
-                    color: rgba(255, 255, 255, 0.5);
-                }
-
-                .char-count {
-                    position: absolute;
-                    bottom: 15px;
-                    right: 20px;
-                    color: rgba(255, 255, 255, 0.6);
-                    font-size: 12px;
-                    display: flex;
-                    align-items: center;
-                    gap: 5px;
-                }
-
-                /* Voice Button */
-                .voice-btn {
+                .question-text {
+                    font-size: 19px;
+                    font-weight: 700;
+                    margin-bottom: 25px;
                     display: block;
-                    margin: 20px auto 0 auto;
-                    background-color: var(--btn-green);
-                    color: white;
-                    border: none;
-                    padding: 10px 25px;
-                    border-radius: 30px;
-                    font-weight: 600;
+                    color: var(--text-dark);
+                }
+
+                .options-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+
+                .option-label {
+                    background: white;
+                    padding: 18px 25px;
+                    border-radius: 15px;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
-                    gap: 8px;
-                    width: fit-content;
+                    gap: 15px;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    border: 1px solid transparent;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
                 }
 
-                /* Footer Navigation */
+                .option-label:hover {
+                    transform: scale(1.02);
+                    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+                    border-color: var(--highlight);
+                    background: #fdfdfd;
+                }
+
+                .option-label input[type="radio"] {
+                    width: 20px;
+                    height: 20px;
+                    accent-color: var(--input-bg);
+                }
+
+                .option-label span {
+                    font-size: 16px;
+                    font-weight: 500;
+                }
+
+                .option-label:has(input:checked) {
+                    background: var(--input-bg);
+                    color: white;
+                    border-color: var(--input-bg);
+                }
+
+                .option-label:has(input:checked) span {
+                    color: white;
+                }
+
+                /* Footer Actions */
                 .footer-nav {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 0 40px;
+                    margin-top: 40px;
                 }
 
                 .back-arrow {
-                    background-color: var(--input-bg);
-                    width: 80px;
-                    height: 40px;
-                    border-radius: 20px;
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    background: white;
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    color: white;
-                    font-size: 24px;
                     text-decoration: none;
+                    color: var(--input-bg);
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+                    transition: all 0.2s;
+                    font-size: 24px;
+                }
+
+                .back-arrow:hover {
+                    transform: translateX(-5px);
+                    background: var(--input-bg);
+                    color: white;
                 }
 
                 .submit-btn {
-                    background-color: var(--input-bg);
+                    background: var(--input-bg);
                     color: white;
-                    padding: 12px 40px;
-                    border-radius: 30px;
-                    font-weight: 700;
-                    font-size: 16px;
+                    padding: 16px 50px;
+                    border-radius: 20px;
+                    font-weight: 800;
+                    font-size: 17px;
                     border: none;
                     cursor: pointer;
+                    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    box-shadow: 0 10px 20px rgba(1, 59, 70, 0.2);
+                }
+
+                .submit-btn:hover {
+                    transform: translateY(-3px) scale(1.05);
+                    box-shadow: 0 15px 30px rgba(1, 59, 70, 0.3);
                 }
             </style>
         </head>
 
         <body>
-
-            <!-- Header Navigation -->
             <div class="header">
                 <div class="nav-left">
                     <a href="${pageContext.request.contextPath}/home">Home</a>
                     <a href="${pageContext.request.contextPath}/learning">Learning</a>
                 </div>
-
                 <a href="${pageContext.request.contextPath}/home" class="logo">
                     <div class="logo-icon">
                         <img src="${pageContext.request.contextPath}/images/mindlink.png" alt="MindLink">
                     </div>
                     <span>MindLink</span>
                 </a>
-
                 <div class="nav-right">
                     <a href="${pageContext.request.contextPath}/forum/welcome">Forum</a>
                     <a href="${pageContext.request.contextPath}/profile">Profile</a>
@@ -280,9 +322,14 @@
 
             <div class="container">
                 <div class="assessment-card">
+                    <div class="progress-container">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="progress-text">
+                        STEP ${currentPage} / ${totalPages}
+                    </div>
 
-                    <a href="/assessment" class="close-btn">✕</a>
-                    <div class="progress-pill">10 Of 10</div>
+                    <a href="${pageContext.request.contextPath}/assessment/select-module" class="close-btn">✕</a>
 
                     <div class="card-header">
                         <h1>${title}</h1>
@@ -290,17 +337,20 @@
                     </div>
 
                     <form action="${pageContext.request.contextPath}/assessment/submit" method="post">
-                        <c:forEach var="question" items="${questions}" varStatus="status">
-                            <div class="content-row" style="display: block; text-align: left; margin-bottom: 30px;">
-                                <h3 style="margin-bottom: 15px;">${status.index + 1}. ${question.questionText}</h3>
+                        <input type="hidden" name="title" value="${title}">
+                        <input type="hidden" name="currentPage" value="${currentPage}">
+                        <input type="hidden" name="totalPages" value="${totalPages}">
 
-                                <div class="options-group" style="display: flex; gap: 20px; flex-wrap: wrap;">
-                                    <c:forEach var="option" items="${question.options}">
-                                        <label
-                                            style="background: var(--bg-color); padding: 10px 20px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                                            <input type="radio" name="q_${question.id}" value="${option.scoreValue}"
-                                                required>
-                                            <span style="font-weight: 500;">${option.optionText}</span>
+                        <c:forEach var="q" items="${questions}" varStatus="status">
+                            <div class="question-block">
+                                <input type="hidden" name="qt_${q.id}" value="${q.questionText}">
+                                <span class="question-text">${q.questionText}</span>
+                                <div class="options-group">
+                                    <c:forEach var="opt" items="${q.options}">
+                                        <label class="option-label">
+                                            <input type="radio" name="qa_${q.id}"
+                                                value="${opt.optionText}|${opt.scoreValue}" required>
+                                            <span>${opt.optionText}</span>
                                         </label>
                                     </c:forEach>
                                 </div>
@@ -308,20 +358,27 @@
                         </c:forEach>
 
                         <div class="footer-nav">
-                            <a href="${pageContext.request.contextPath}/assessment" class="back-arrow">&larr;</a>
-                            <button type="submit" class="submit-btn">Submit Assessment</button>
+                            <c:choose>
+                                <c:when test="${currentPage > 1}">
+                                    <a href="${pageContext.request.contextPath}/assessment/questions?title=${title}&page=${currentPage - 1}"
+                                        class="back-arrow">&larr;</a>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="${pageContext.request.contextPath}/assessment/select-module"
+                                        class="back-arrow">&larr;</a>
+                                </c:otherwise>
+                            </c:choose>
+
+                            <button type="submit" class="submit-btn">
+                                <c:choose>
+                                    <c:when test="${currentPage == totalPages}">Submit Assessment</c:when>
+                                    <c:otherwise>Next Page &rarr;</c:otherwise>
+                                </c:choose>
+                            </button>
                         </div>
                     </form>
-
                 </div>
             </div>
-
-            <script>
-                function updateCount(textarea) {
-                    document.getElementById('count').innerText = textarea.value.length;
-                }
-            </script>
-
         </body>
 
         </html>

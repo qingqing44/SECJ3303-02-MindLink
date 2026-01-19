@@ -204,4 +204,5 @@ public class CounselingController {
 
         return "counseling/booking_success";
     }
+    
 }

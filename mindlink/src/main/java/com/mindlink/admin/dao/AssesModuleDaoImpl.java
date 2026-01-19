@@ -14,11 +14,11 @@ public class AssesModuleDaoImpl implements AssesModuleDao {
     @Override
     public List<LearningModule> findAll() {
         // SQL change: Query unique module IDs and titles from the assessment table
-        String sql = "SELECT DISTINCT module_id, assessment_title FROM assessment";
-        
+        String sql = "SELECT DISTINCT set_id, assessment_title FROM assessment";
+
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             LearningModule m = new LearningModule();
-            m.setModuleId(rs.getInt("module_id"));
+            m.setModuleId(rs.getInt("set_id"));
             m.setTitle(rs.getString("assessment_title"));
             m.setDescription("Questions grouped under this module."); // Placeholder
             return m;

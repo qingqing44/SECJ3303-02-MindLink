@@ -5,7 +5,6 @@ import com.mindlink.usermanagement.service.UserManagementCounselorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +45,8 @@ public class CounselorApplicationController {
             String checkEmailSql = "SELECT COUNT(*) FROM counselor WHERE email = ?";
             Integer emailCount = jdbcTemplate.queryForObject(checkEmailSql, Integer.class, email);
             if (emailCount != null && emailCount > 0) {
-                redirectAttributes.addFlashAttribute("error", "This email is already registered. Please use a different email.");
+                redirectAttributes.addFlashAttribute("error",
+                        "This email is already registered. Please use a different email.");
                 return "redirect:/counselor/apply";
             }
 
@@ -71,12 +71,13 @@ public class CounselorApplicationController {
             // Save counselor application
             counselorService.saveCounselor(counselor);
 
-            redirectAttributes.addFlashAttribute("success", 
-                "Your application has been submitted successfully! An administrator will review your application and you will be notified once a decision is made.");
+            redirectAttributes.addFlashAttribute("success",
+                    "Your application has been submitted successfully! An administrator will review your application and you will be notified once a decision is made.");
             return "redirect:/counselor/apply";
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "An error occurred while submitting your application. Please try again.");
+            redirectAttributes.addFlashAttribute("error",
+                    "An error occurred while submitting your application. Please try again.");
             return "redirect:/counselor/apply";
         }
     }
@@ -95,4 +96,3 @@ public class CounselorApplicationController {
         }
     }
 }
-

@@ -101,49 +101,27 @@
                 /* THE SCROLLABLE CARD */
                 .result-card {
                     background-color: var(--card-bg);
-                    width: 1000px;
-                    height: 600px;
-                    /* Fixed height to force scrolling */
+                    width: 100%;
+                    max-width: 850px;
+                    /* Reduced width */
+                    margin-top: 600px;
+                    /* Push down to avoid header overlap */
                     border-radius: 50px;
-                    padding: 20px 40px;
+                    padding: 40px;
                     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
                     position: relative;
-
-                    /* Enable Vertical Scrolling */
-                    overflow-y: auto;
-                    scroll-behavior: smooth;
-
-                    /* Hide standard scrollbar for cleaner look */
-                    scrollbar-width: thin;
-                    scrollbar-color: #000000 #E0E0E0;
+                    overflow: visible;
+                    /* Remove scrollbar as requested */
                 }
 
-                /* Custom Scrollbar Styling (Webkit) */
-                .result-card::-webkit-scrollbar {
-                    width: 20px;
-                }
-
-                .result-card::-webkit-scrollbar-track {
-                    background: #E0E0E0;
-                    border-radius: 10px;
-                    margin: 20px 0;
-                }
-
-                .result-card::-webkit-scrollbar-thumb {
-                    background-color: #fff;
-                    border: 2px solid #000;
-                    border-radius: 10px;
-                }
-
-                /* --- SECTION 1: SCORE --- */
+                /* Section Score */
                 .section-score {
-                    height: 600px;
-                    /* Full height of card */
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
                     align-items: center;
                     text-align: center;
+                    margin-bottom: 60px;
                 }
 
                 h1 {
@@ -185,14 +163,13 @@
                     color: white;
                 }
 
-                /* --- SECTION 2: SUGGESTIONS --- */
+                /* Section Suggestion */
                 .section-suggestion {
-                    min-height: 600px;
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
                     align-items: center;
-                    padding-top: 20px;
+                    padding-bottom: 40px;
                 }
 
                 .suggestion-grid {
@@ -358,7 +335,7 @@
                             </div>
                         </div>
 
-                        <a href="${pageContext.request.contextPath}/home" class="btn-done">Done</a>
+                        <a href="${pageContext.request.contextPath}/assessment" class="btn-done">Done</a>
                     </div>
 
                 </div>
